@@ -30,10 +30,10 @@
   <div class="container">
     <h2>Get in Touch</h2>
     <p>Have questions? Want to partner with us? Or just say hello? We’d love to hear from you!</p>
-    <form>
-      <input type="text" placeholder="Your Name" required>
-      <input type="email" placeholder="Your Email" required>
-      <textarea rows="5" placeholder="Your Message" required></textarea>
+    <form action="send_mail.php" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" rows="5" placeholder="Your Message" required></textarea>
       <button type="submit">Send Message</button>
     </form>
     <p>📧 Email: toletearth@gmail.com<br>📞 Phone: +91 92651 67835</p>
@@ -44,4 +44,5 @@
 </body>
 
 </html>
+
 
