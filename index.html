@@ -33,9 +33,14 @@
     .hero {
       text-align: center;
       padding: 3rem 1rem;
-      background: url('Flowers Add.jpg') no-repeat center/cover;
-      color: #C7005D;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+      background: url('Flowers%20Add.jpg') no-repeat center/cover;
+      color: #0FFF50;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8); /* Darker shadow for better readability */
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     .container {
       max-width: 1100px;
@@ -72,13 +77,20 @@
       background: #2d5c7f;
       color: white;
       cursor: pointer;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #1e4568;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>TOLET Earth<img src="Color-removebg.png" width="45" height="45"></h1>
+    <h1>TOLET Earth<img src="Color-removebg.png" width="45" height="45" alt="TOLET Earth Logo"></h1>
     <p>Rent Freely. Connect Globally.</p>
   </header>
 
@@ -93,7 +105,7 @@
     <h2>Find Your Perfect Home — No Brokers, No Fees.</h2>
     <p>Join a trusted community of homeowners and renters.</p>
     <a href="listings.html">
-    <button>Browse Listings</button>
+      <button>Browse Listings</button>
     </a>
   </section>
 
@@ -113,21 +125,18 @@
       <h2>For Homeowners</h2>
       <p>List your property in less than 2 minutes.</p>
       <a href="https://docs.google.com/forms/d/e/1FAIpQLSfPQxPQHTE2G_APvAedfwIc6MOilbeQzJumYnV5wtEOlcGf3Q/viewform?usp=dialog" target="_blank">
-      <button style="padding: 10px 20px; background: #2d5c7f; color: white; border: none; border-radius: 5px; cursor: pointer;">
-      List Your Property ️🏠
-      </button>
+        <button>List Your Property ️🏠</button>
       </a>
     </section>
 
     <section class="card">
       <h2>For Renters</h2>
       <p>Find homes that match your budget and needs.</p>
-      <a href="listings.html" target="_blank">
-      <button style="padding: 10px 20px; background: #2d5c7f; color: white; border: none; border-radius: 5px; cursor: pointer;">
-      Browse Listings 🏠
-      </button>
+      <a href="listings.html">
+        <button>Browse Listings 🏠</button>
       </a>
     </section>
+  </div> <!-- This closing div was missing -->
 
   <footer>
     <p>Made with ❤️ for a happier, broker-free world.</p>
