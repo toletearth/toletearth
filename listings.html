@@ -1,55 +1,398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rental Listings - ToletEarth</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2d5c7f;
-            text-align: center;
-        }
-        iframe {
-            width: 100%;
-            height: 600px;
-            border: none;
-            border-radius: 8px;
-        }
-        .note {
-            text-align: center;
-            font-style: italic;
-            color: #666;
-            margin-top: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rental Listings - ToletEarth</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+    :root{
+        --brand:#2d5c7f;
+        --brand-dark:#204a68;
+        --brand-light:#e8f0f6;
+        --bg:#f9f9f9;
+        --text:#333;
+        --muted:#666;
+        --line:#e3e6e9;
+    }
+    *{box-sizing:border-box;}
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: var(--bg);
+        color: var(--text);
+    }
+    .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+        color: var(--brand);
+        text-align: center;
+        margin-bottom: 4px;
+    }
+    h1 img{ vertical-align: middle; margin-left: 8px; }
+    .note {
+        text-align: center;
+        font-style: italic;
+        color: var(--muted);
+        margin-top: 4px;
+        margin-bottom: 20px;
+    }
+
+    /* Filters */
+    .filters{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        background:var(--brand-light);
+        padding:14px;
+        border-radius:8px;
+        margin-bottom:20px;
+        align-items:center;
+    }
+    .filters input, .filters select{
+        font-family:inherit;
+        font-size:14px;
+        padding:8px 10px;
+        border:1px solid var(--line);
+        border-radius:6px;
+        background:white;
+        color:var(--text);
+    }
+    .filters input[type="text"]{ flex:1 1 220px; }
+    .filters select{ flex:0 1 140px; }
+    .filters .clear-btn{
+        flex:0 0 auto;
+        background:var(--brand);
+        color:white;
+        border:none;
+        cursor:pointer;
+        padding:8px 14px;
+        border-radius:6px;
+        font-size:14px;
+    }
+    .filters .clear-btn:hover{ background:var(--brand-dark); }
+
+    .result-count{
+        color:var(--muted);
+        font-size:14px;
+        margin-bottom:14px;
+    }
+
+    /* Card grid */
+    .grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+        gap:18px;
+    }
+    .card{
+        border:1px solid var(--line);
+        border-radius:10px;
+        overflow:hidden;
+        background:white;
+        display:flex;
+        flex-direction:column;
+        transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .card:hover{
+        transform:translateY(-3px);
+        box-shadow:0 6px 14px rgba(0,0,0,0.12);
+    }
+    .card-photo{
+        width:100%;
+        height:160px;
+        background:var(--brand-light) center/cover no-repeat;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:var(--brand);
+        font-size:13px;
+    }
+    .card-photo svg{ width:40px; height:40px; opacity:.5; }
+    .card-body{
+        padding:14px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        flex:1;
+    }
+    .card-top{
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:8px;
+    }
+    .rent{
+        font-size:19px;
+        font-weight:700;
+        color:var(--brand);
+        white-space:nowrap;
+    }
+    .rent span{
+        font-size:12px;
+        font-weight:400;
+        color:var(--muted);
+    }
+    .tags{
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px;
+    }
+    .tag{
+        background:var(--brand-light);
+        color:var(--brand-dark);
+        font-size:12px;
+        padding:3px 8px;
+        border-radius:20px;
+        white-space:nowrap;
+    }
+    .location{
+        font-size:14px;
+        color:var(--text);
+        font-weight:600;
+        display:flex;
+        gap:6px;
+        align-items:flex-start;
+    }
+    .description{
+        font-size:13px;
+        color:var(--muted);
+        line-height:1.4;
+        display:-webkit-box;
+        -webkit-line-clamp:2;
+        -webkit-box-orient:vertical;
+        overflow:hidden;
+    }
+    .card-footer{
+        margin-top:auto;
+        padding-top:8px;
+        border-top:1px solid var(--line);
+    }
+    .call-btn{
+        display:block;
+        text-align:center;
+        background:var(--brand);
+        color:white;
+        text-decoration:none;
+        padding:9px;
+        border-radius:6px;
+        font-size:14px;
+        font-weight:600;
+    }
+    .call-btn:hover{ background:var(--brand-dark); }
+    .call-btn.secondary{
+        background:white;
+        color:var(--brand);
+        border:1px solid var(--brand);
+    }
+    .call-btn.secondary:hover{ background:var(--brand-light); }
+
+    .state-msg{
+        text-align:center;
+        color:var(--muted);
+        padding:40px 10px;
+        font-size:15px;
+    }
+    .list-cta{
+        display:block;
+        max-width:260px;
+        margin:20px auto 0;
+        text-align:center;
+        background:var(--brand);
+        color:white;
+        text-decoration:none;
+        padding:12px;
+        border-radius:8px;
+        font-weight:600;
+    }
+    .list-cta:hover{ background:var(--brand-dark); }
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Available Rental Properties<img src="Color-removebg.png" width="45" height="45"></h1>
-        <p class="note">Contact owners directly — No brokers, no fees.</p>
+<div class="container">
+    <h1>Available Rental Properties<img src="Color-removebg.png" width="45" height="45" alt=""></h1>
+    <p class="note">Contact owners directly — No brokers, no fees.</p>
 
-        <!-- Paste your Google Sheet embed code here -->
-        <<iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTWAoOb9LwodFn6MSgeZ-Xwk17xsuZpP2KzZBwt-BRoEuTcDxpKLiOSpapFG6hkQAPvd93mTmCkWKR0/pubhtml?gid=1666116658&amp;single=true&amp;widget=true&amp;headers=false"></iframe>
-        
-        <p class="note">Use <strong>Ctrl + F</strong> to search for specific locations, rent ranges, or keywords.</p>
+    <div class="filters">
+        <input type="text" id="searchInput" placeholder="Search by location, e.g. Chajju Majra, Sector 123...">
+        <select id="bhkFilter">
+            <option value="">Any BHK</option>
+        </select>
+        <select id="furnishedFilter">
+            <option value="">Any Furnishing</option>
+        </select>
+        <select id="rentFilter">
+            <option value="">Any Budget</option>
+            <option value="10000">Under ₹10,000</option>
+            <option value="15000">Under ₹15,000</option>
+            <option value="20000">Under ₹20,000</option>
+            <option value="30000">Under ₹30,000</option>
+        </select>
+        <button class="clear-btn" id="clearBtn">Clear</button>
     </div>
 
-</body>
+    <p class="result-count" id="resultCount"></p>
 
+    <div id="grid" class="grid">
+        <p class="state-msg" id="stateMsg">Loading listings…</p>
+    </div>
+
+    <a class="list-cta" href="index.html#list-property">+ List Your Property</a>
+</div>
+
+<script>
+// ⚠️ Set this to your TOLET Earth contact number shown when an owner has chosen "Call us"
+const TOLETEARTH_CONTACT_NUMBER = "+91 92651 67835";
+
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWAoOb9LwodFn6MSgeZ-Xwk17xsuZpP2KzZBwt-BRoEuTcDxpKLiOSpapFG6hkQAPvd93mTmCkWKR0/pub?gid=1666116658&single=true&output=csv";
+
+let allListings = [];
+
+function driveViewUrl(link) {
+    if (!link) return null;
+    const match = link.match(/[-\w]{25,}/);
+    if (!match) return null;
+    return `https://drive.google.com/uc?export=view&id=${match[0]}`;
+}
+
+function houseIconSVG() {
+    return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg>`;
+}
+
+function normalizeRow(row) {
+    return {
+        owner: row["Owner Name"] || "",
+        type: row["Property Type"] || "",
+        location: row["Full Address or Area / Locality"] || "",
+        rent: parseInt((row["Monthly Rent (Rs/-)"] || "").replace(/[^\d]/g, "")) || 0,
+        bhk: (row["BHK"] || "").trim(),
+        furnished: (row["Furnished"] || "").trim(),
+        description: row["Description"] || "",
+        photo: driveViewUrl(row["Upload Photos"]),
+        contact: (row["Contact"] || "").trim(),
+        confirmation: (row["Need Confirmaion"] || row["Need Confirmation"] || "").trim().toLowerCase()
+    };
+}
+
+function populateFilterOptions(listings) {
+    const bhkSet = new Set(listings.map(l => l.bhk).filter(Boolean));
+    const furnishedSet = new Set(listings.map(l => l.furnished).filter(Boolean));
+
+    const bhkFilter = document.getElementById("bhkFilter");
+    [...bhkSet].sort().forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v + " BHK";
+        bhkFilter.appendChild(opt);
+    });
+
+    const furnishedFilter = document.getElementById("furnishedFilter");
+    [...furnishedSet].sort().forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        furnishedFilter.appendChild(opt);
+    });
+}
+
+function renderCard(l) {
+    const photoHTML = l.photo
+        ? `<div class="card-photo" style="background-image:url('${l.photo}')"></div>`
+        : `<div class="card-photo">${houseIconSVG()}</div>`;
+
+    const tags = [];
+    if (l.type) tags.push(l.type);
+    if (l.bhk) tags.push(l.bhk + " BHK");
+    if (l.furnished) tags.push(l.furnished + " Furnished");
+
+    const showDirect = l.confirmation === "allow" && l.contact;
+    const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
+    const btnLabel = showDirect ? `Call ${l.contact}` : "Call TOLET Earth";
+    const btnClass = showDirect ? "" : "secondary";
+
+    return `
+    <div class="card">
+        ${photoHTML}
+        <div class="card-body">
+            <div class="card-top">
+                <div class="location">📍 ${l.location || "Location on request"}</div>
+                <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
+            </div>
+            <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+            ${l.description ? `<div class="description">${l.description}</div>` : ""}
+            <div class="card-footer">
+                <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}">${btnLabel}</a>
+            </div>
+        </div>
+    </div>`;
+}
+
+function applyFilters() {
+    const search = document.getElementById("searchInput").value.trim().toLowerCase();
+    const bhk = document.getElementById("bhkFilter").value;
+    const furnished = document.getElementById("furnishedFilter").value;
+    const maxRent = document.getElementById("rentFilter").value;
+
+    let filtered = allListings.filter(l => {
+        if (search && !l.location.toLowerCase().includes(search) && !l.description.toLowerCase().includes(search)) return false;
+        if (bhk && l.bhk !== bhk) return false;
+        if (furnished && l.furnished !== furnished) return false;
+        if (maxRent && (!l.rent || l.rent > parseInt(maxRent))) return false;
+        return true;
+    });
+
+    const grid = document.getElementById("grid");
+    const countEl = document.getElementById("resultCount");
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<p class="state-msg">No properties match your search. Try clearing some filters.</p>`;
+        countEl.textContent = "";
+        return;
+    }
+
+    countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found`;
+    grid.innerHTML = filtered.map(renderCard).join("");
+}
+
+Papa.parse(CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+        allListings = results.data
+            .map(normalizeRow)
+            .filter(l => l.location || l.rent); // drop fully blank rows
+
+        if (allListings.length === 0) {
+            document.getElementById("stateMsg").textContent = "No listings available yet. Check back soon!";
+            return;
+        }
+
+        populateFilterOptions(allListings);
+        applyFilters();
+    },
+    error: function() {
+        document.getElementById("stateMsg").textContent = "Couldn't load listings right now. Please try again shortly.";
+    }
+});
+
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("bhkFilter").addEventListener("change", applyFilters);
+document.getElementById("furnishedFilter").addEventListener("change", applyFilters);
+document.getElementById("rentFilter").addEventListener("change", applyFilters);
+document.getElementById("clearBtn").addEventListener("click", function() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("bhkFilter").value = "";
+    document.getElementById("furnishedFilter").value = "";
+    document.getElementById("rentFilter").value = "";
+    applyFilters();
+});
+</script>
+
+</body>
 </html>
