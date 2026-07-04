@@ -113,6 +113,7 @@
         justify-content:center;
         color:var(--brand);
         font-size:13px;
+        position:relative;
     }
     .card-photo svg{ width:40px; height:40px; opacity:.5; }
     .card-photo img{
@@ -120,6 +121,36 @@
         height:100%;
         object-fit:cover;
         display:block;
+    }
+    .carousel-btn{
+        position:absolute;
+        top:50%;
+        transform:translateY(-50%);
+        width:26px;
+        height:26px;
+        border-radius:50%;
+        border:none;
+        background:rgba(0,0,0,0.45);
+        color:white;
+        font-size:16px;
+        line-height:1;
+        cursor:pointer;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+    .carousel-btn:hover{ background:rgba(0,0,0,0.65); }
+    .carousel-btn.prev{ left:6px; }
+    .carousel-btn.next{ right:6px; }
+    .carousel-count{
+        position:absolute;
+        bottom:6px;
+        right:8px;
+        background:rgba(0,0,0,0.55);
+        color:white;
+        font-size:11px;
+        padding:2px 7px;
+        border-radius:10px;
     }
     .card-body{
         padding:14px;
@@ -261,12 +292,10 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWAoOb9LwodFn6
 
 let allListings = [];
 
-function driveViewUrl(link) {
-    if (!link) return null;
-    const match = link.match(/[-\w]{25,}/);
-    if (!match) return null;
-    // Google's thumbnail endpoint hotlinks far more reliably than uc?export=view
-    return `https://drive.google.com/thumbnail?id=${match[0]}&sz=w600`;
+function driveIds(raw) {
+    if (!raw) return [];
+    const matches = raw.match(/[-\w]{25,}/g) || [];
+    return matches.map(id => `https://drive.google.com/thumbnail?id=${id}&sz=w600`);
 }
 
 function houseIconSVG() {
@@ -292,7 +321,7 @@ function normalizeRow(row) {
         bhk: getField(row, ["bhk"]),
         furnished: getField(row, ["furnished"]),
         description: getField(row, ["description"]),
-        photo: driveViewUrl(getField(row, ["photo", "upload"])),
+        photos: driveIds(getField(row, ["photo", "upload"])),
         contact: getField(row, ["contact"]),
         confirmation: getField(row, ["confirmation", "confirmaion"]).toLowerCase(),
         status: getField(row, ["status"]).toLowerCase()
@@ -318,11 +347,27 @@ function populateFilterOptions(listings) {
     });
 }
 
-function renderCard(l) {
+let currentPhotoSets = [];
+
+function renderCard(l, idx) {
     const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
-    const photoHTML = l.photo
-        ? `<div class="card-photo"><img src="${l.photo}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`
-        : `<div class="card-photo">${houseIconSVG()}</div>`;
+    const photos = l.photos;
+    currentPhotoSets[idx] = photos;
+
+    let photoHTML;
+    if (photos.length === 0) {
+        photoHTML = `<div class="card-photo">${houseIconSVG()}</div>`;
+    } else if (photos.length === 1) {
+        photoHTML = `<div class="card-photo"><img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
+    } else {
+        photoHTML = `
+        <div class="card-photo" id="photo-${idx}">
+            <img src="${photos[0]}" data-current="0" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
+            <button class="carousel-btn prev" onclick="changePhoto(${idx}, -1)" aria-label="Previous photo">‹</button>
+            <button class="carousel-btn next" onclick="changePhoto(${idx}, 1)" aria-label="Next photo">›</button>
+            <span class="carousel-count">1/${photos.length}</span>
+        </div>`;
+    }
 
     const tags = [];
     if (l.type) tags.push(l.type);
@@ -351,6 +396,19 @@ function renderCard(l) {
     </div>`;
 }
 
+function changePhoto(idx, direction) {
+    const photos = currentPhotoSets[idx];
+    if (!photos || photos.length < 2) return;
+    const container = document.getElementById(`photo-${idx}`);
+    if (!container) return;
+    const img = container.querySelector('img');
+    let current = parseInt(img.dataset.current, 10);
+    current = (current + direction + photos.length) % photos.length;
+    img.dataset.current = current;
+    img.src = photos[current];
+    container.querySelector('.carousel-count').textContent = `${current + 1}/${photos.length}`;
+}
+
 function applyFilters() {
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
     const bhk = document.getElementById("bhkFilter").value;
@@ -375,7 +433,8 @@ function applyFilters() {
     }
 
     countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found`;
-    grid.innerHTML = filtered.map(renderCard).join("");
+    currentPhotoSets = [];
+    grid.innerHTML = filtered.map((l, idx) => renderCard(l, idx)).join("");
 }
 
 Papa.parse(CSV_URL, {
