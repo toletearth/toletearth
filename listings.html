@@ -249,6 +249,82 @@
         font-weight:600;
     }
     .list-cta:hover{ background:var(--brand-dark); }
+
+    .card{ cursor:pointer; }
+
+    /* Detail modal */
+    .modal-overlay{
+        display:none;
+        position:fixed;
+        top:0; left:0; right:0; bottom:0;
+        background:rgba(0,0,0,0.6);
+        z-index:1000;
+        align-items:flex-start;
+        justify-content:center;
+        overflow-y:auto;
+        padding:20px 12px;
+    }
+    .modal-overlay.open{ display:flex; }
+    .modal-box{
+        background:white;
+        border-radius:12px;
+        max-width:560px;
+        width:100%;
+        overflow:hidden;
+        position:relative;
+        margin-top:20px;
+    }
+    .modal-close{
+        position:absolute;
+        top:10px;
+        right:10px;
+        width:34px;
+        height:34px;
+        border-radius:50%;
+        border:none;
+        background:rgba(0,0,0,0.55);
+        color:white;
+        font-size:20px;
+        cursor:pointer;
+        z-index:5;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+    .modal-photo{
+        width:100%;
+        height:280px;
+        background:var(--brand-light);
+        position:relative;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:var(--brand);
+    }
+    .modal-photo svg{ width:60px; height:60px; opacity:.5; }
+    .modal-photo img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+    }
+    .modal-body{
+        padding:20px;
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+    }
+    .modal-body .location{ font-size:18px; }
+    .modal-body .rent{ font-size:24px; }
+    .modal-body .description{
+        -webkit-line-clamp:unset;
+        display:block;
+        overflow:visible;
+        font-size:14px;
+        line-height:1.6;
+        white-space:pre-wrap;
+    }
+    .modal-body .call-btn{ font-size:16px; padding:12px; }
 </style>
 </head>
 <body>
@@ -282,6 +358,14 @@
     </div>
 
     <a class="list-cta" href="index.html#list-property">+ List Your Property</a>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+        <div id="modalPhotoArea"></div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
 </div>
 
 <script>
@@ -348,6 +432,9 @@ function populateFilterOptions(listings) {
 }
 
 let currentPhotoSets = [];
+let currentListings = [];
+let currentModalListing = null;
+let modalPhotoIndex = 0;
 
 function renderCard(l, idx) {
     const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
@@ -380,7 +467,7 @@ function renderCard(l, idx) {
     const btnClass = showDirect ? "" : "secondary";
 
     return `
-    <div class="card">
+    <div class="card" onclick="openModal(${idx})">
         ${photoHTML}
         <div class="card-body">
             <div class="card-top">
@@ -390,7 +477,7 @@ function renderCard(l, idx) {
             <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
             ${l.description ? `<div class="description">${l.description}</div>` : ""}
             <div class="card-footer">
-                <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}">${btnLabel}</a>
+                <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}" onclick="event.stopPropagation()">${btnLabel}</a>
             </div>
         </div>
     </div>`;
@@ -408,6 +495,75 @@ function changePhoto(idx, direction) {
     img.src = photos[current];
     container.querySelector('.carousel-count').textContent = `${current + 1}/${photos.length}`;
 }
+
+function openModal(idx) {
+    const l = currentListings[idx];
+    if (!l) return;
+    modalPhotoIndex = 0;
+    currentModalListing = l;
+
+    document.getElementById("modalPhotoArea").innerHTML = renderModalPhoto(l.photos, 0);
+
+    const tags = [];
+    if (l.type) tags.push(l.type);
+    if (l.bhk) tags.push(l.bhk + " BHK");
+    if (l.furnished) tags.push(l.furnished + " Furnished");
+
+    const showDirect = l.confirmation === "allow" && l.contact;
+    const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
+    const btnLabel = showDirect ? `Call ${l.contact}` : "Call TOLET Earth";
+    const btnClass = showDirect ? "" : "secondary";
+
+    document.getElementById("modalBody").innerHTML = `
+        <div class="card-top">
+            <div class="location">📍 ${l.location || "Location on request"}</div>
+            <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
+        </div>
+        <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+        ${l.description ? `<div class="description">${l.description}</div>` : `<div class="description">No additional description provided.</div>`}
+        <div class="card-footer">
+            <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}">${btnLabel}</a>
+        </div>
+    `;
+
+    document.getElementById("modalOverlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+}
+
+function closeModal() {
+    document.getElementById("modalOverlay").classList.remove("open");
+    document.body.style.overflow = "";
+    currentModalListing = null;
+}
+
+function renderModalPhoto(photos, index) {
+    const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
+    if (!photos || photos.length === 0) {
+        return `<div class="modal-photo">${houseIconSVG()}</div>`;
+    }
+    if (photos.length === 1) {
+        return `<div class="modal-photo"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
+    }
+    return `
+    <div class="modal-photo">
+        <img src="${photos[index]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
+        <button class="carousel-btn prev" onclick="event.stopPropagation(); changeModalPhoto(-1)" aria-label="Previous photo">‹</button>
+        <button class="carousel-btn next" onclick="event.stopPropagation(); changeModalPhoto(1)" aria-label="Next photo">›</button>
+        <span class="carousel-count">${index + 1}/${photos.length}</span>
+    </div>`;
+}
+
+function changeModalPhoto(direction) {
+    if (!currentModalListing) return;
+    const photos = currentModalListing.photos;
+    if (!photos || photos.length < 2) return;
+    modalPhotoIndex = (modalPhotoIndex + direction + photos.length) % photos.length;
+    document.getElementById("modalPhotoArea").innerHTML = renderModalPhoto(photos, modalPhotoIndex);
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeModal();
+});
 
 function applyFilters() {
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
@@ -434,6 +590,7 @@ function applyFilters() {
 
     countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found`;
     currentPhotoSets = [];
+    currentListings = filtered;
     grid.innerHTML = filtered.map((l, idx) => renderCard(l, idx)).join("");
 }
 
