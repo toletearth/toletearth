@@ -1,254 +1,359 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>List Your Property - ToletEarth</title>
-<style>
-    :root{
-        --brand:#2d5c7f;
-        --brand-dark:#204a68;
-        --brand-light:#e8f0f6;
-        --bg:#f9f9f9;
-        --text:#333;
-        --muted:#666;
-        --line:#e3e6e9;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>List Your Property - ToletEarth</title>
+  <style>
+    :root {
+      --brand: #2d5c7f;
+      --brand-dark: #204a68;
+      --brand-light: #e8f0f6;
+      --bg: #f9f9f9;
+      --text: #333;
+      --muted: #666;
+      --line: #e3e6e9;
     }
-    *{box-sizing:border-box;}
+    * {
+      box-sizing: border-box;
+    }
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: var(--bg);
-        color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    /* Navigation */
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      background: #1e4568;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover {
+      text-decoration: underline;
     }
     .container {
-        max-width: 640px;
-        margin: 0 auto;
-        background: white;
-        padding: 24px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 640px;
+      margin: 0 auto;
+      background: white;
+      padding: 28px 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-bottom: 4px solid var(--brand);
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+    }
+    .header img {
+      width: 45px;
+      height: 45px;
     }
     h1 {
-        color: var(--brand);
-        text-align: center;
-        margin-bottom: 4px;
+      color: var(--brand);
+      font-size: 26px;
+      margin: 0;
     }
     .note {
-        text-align: center;
-        font-style: italic;
-        color: var(--muted);
-        margin-top: 4px;
-        margin-bottom: 24px;
-        font-size: 14px;
+      text-align: center;
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 4px;
+      margin-bottom: 24px;
+      font-size: 14px;
     }
     label {
-        display: block;
-        font-weight: 600;
-        font-size: 14px;
-        margin: 16px 0 6px;
-        color: var(--brand-dark);
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      margin: 18px 0 6px;
+      color: var(--brand-dark);
     }
-    input[type="text"], input[type="tel"], input[type="number"], select, textarea {
-        width: 100%;
-        font-family: inherit;
-        font-size: 15px;
-        padding: 10px 12px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: white;
-        color: var(--text);
+    label .icon {
+      margin-right: 6px;
     }
-    textarea { resize: vertical; min-height: 80px; }
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      font-family: inherit;
+      font-size: 15px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      color: var(--text);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
     .file-input-wrap {
-        border: 2px dashed var(--line);
-        border-radius: 8px;
-        padding: 16px;
-        text-align: center;
-        background: var(--brand-light);
+      border: 2px dashed var(--brand);
+      border-radius: 8px;
+      padding: 20px 16px;
+      text-align: center;
+      background: var(--brand-light);
+      transition: background 0.2s;
     }
-    .file-input-wrap input[type="file"] { width: 100%; }
-    .file-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .file-input-wrap:hover {
+      background: #dbe9f2;
+    }
+    .file-input-wrap input[type="file"] {
+      width: 100%;
+      cursor: pointer;
+    }
+    .file-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
     #photoPreview {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: center;
     }
     #photoPreview img {
-        width: 64px;
-        height: 64px;
-        object-fit: cover;
-        border-radius: 6px;
-        border: 1px solid var(--line);
+      width: 72px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    .privacy-note {
+      font-size: 13px;
+      color: var(--muted);
+      background: #f1f5f9;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      line-height: 1.5;
     }
     .submit-btn {
-        width: 100%;
-        margin-top: 24px;
-        background: var(--brand);
-        color: white;
-        border: none;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
+      width: 100%;
+      margin-top: 28px;
+      background: var(--brand);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .submit-btn:hover { background: var(--brand-dark); }
-    .submit-btn:disabled { background: #a9bcc9; cursor: not-allowed; }
+    .submit-btn:hover {
+      background: var(--brand-dark);
+    }
+    .submit-btn:disabled {
+      background: #a9bcc9;
+      cursor: not-allowed;
+    }
     .status-msg {
-        text-align: center;
-        margin-top: 16px;
-        font-weight: 600;
-        display: none;
+      text-align: center;
+      margin-top: 16px;
+      font-weight: 600;
+      display: none;
     }
-    .status-msg.success { color: #15803d; display: block; }
-    .status-msg.error { color: #b91c1c; display: block; }
-    .required { color: #b91c1c; }
-</style>
+    .status-msg.success {
+      color: #15803d;
+      display: block;
+    }
+    .status-msg.error {
+      color: #b91c1c;
+      display: block;
+    }
+    .required {
+      color: #b91c1c;
+    }
+    footer {
+      text-align: center;
+      padding: 20px 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>List Your Property</h1>
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html">🏠 Home</a>
+    <a href="about.html">About Us</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+    <a href="listings.html">Browse Rentals</a>
+  </nav>
+
+  <div class="container">
+    <!-- Header with Logo -->
+    <div class="header">
+      <img src="Color-removebg.png" alt="ToletEarth Logo" />
+      <h1>List Your Property</h1>
+    </div>
     <p class="note">Free forever. Takes about 2 minutes. No brokers, no fees.</p>
 
     <form id="listingForm">
-        <label>Owner Name <span class="required">*</span></label>
-        <input type="text" name="owner" required>
+      <label><span class="icon">📛</span> Owner Name <span class="required">*</span></label>
+      <input type="text" name="owner" required placeholder="e.g. Rajesh Kumar" />
 
-        <label>Property Type <span class="required">*</span></label>
-        <select name="propertyType" required>
-            <option value="">Select...</option>
-            <option>Apartment</option>
-            <option>Independent House</option>
-            <option>PG / Shared Room</option>
-            <option>Office Space</option>
-        </select>
+      <label><span class="icon">🏢</span> Property Type <span class="required">*</span></label>
+      <select name="propertyType" required>
+        <option value="">Select...</option>
+        <option>Apartment</option>
+        <option>Independent House</option>
+        <option>PG / Shared Room</option>
+        <option>Office Space</option>
+        <option>Shop / Commercial</option>
+      </select>
 
-        <label>Full Address or Area / Locality <span class="required">*</span></label>
-        <input type="text" name="address" required placeholder="e.g. Flat 19B, Chajju Majra">
+      <label><span class="icon">📍</span> Full Address / Locality <span class="required">*</span></label>
+      <input type="text" name="address" required placeholder="e.g. Flat 19B, Chajju Majra, Mohali" />
 
-        <label>Monthly Rent (₹) <span class="required">*</span></label>
-        <input type="number" name="rent" required min="0" placeholder="e.g. 15000">
+      <label><span class="icon">💰</span> Monthly Rent (₹) <span class="required">*</span></label>
+      <input type="number" name="rent" required min="0" placeholder="e.g. 15000" />
 
-        <label>BHK <span class="required">*</span></label>
-        <select name="bhk" required>
-            <option value="">Select...</option>
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4+</option>
-        </select>
+      <label><span class="icon">🛏️</span> BHK <span class="required">*</span></label>
+      <select name="bhk" required>
+        <option value="">Select...</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4+</option>
+      </select>
 
-        <label>Furnished</label>
-        <select name="furnished">
-            <option value="">Select...</option>
-            <option>Fully</option>
-            <option>Semi</option>
-            <option>Unfurnished</option>
-        </select>
+      <label><span class="icon">🛋️</span> Furnished</label>
+      <select name="furnished">
+        <option value="">Select...</option>
+        <option>Fully</option>
+        <option>Semi</option>
+        <option>Unfurnished</option>
+      </select>
 
-        <label>Preferred Tenants</label>
-        <select name="preference">
-            <option value="Any">Any</option>
-            <option>Family</option>
-            <option>Boys Only</option>
-            <option>Girls Only</option>
-            <option>Company Lease</option>
-        </select>
+      <label><span class="icon">👥</span> Preferred Tenants</label>
+      <select name="preference">
+        <option value="Any">Any (Family / Bachelors / All)</option>
+        <option>Family</option>
+        <option>Boys Only</option>
+        <option>Girls Only</option>
+        <option>Company Lease</option>
+      </select>
 
-        <label>Description</label>
-        <textarea name="description" placeholder="AC, parking, nearby landmarks, etc."></textarea>
+      <label><span class="icon">📝</span> Description</label>
+      <textarea name="description" placeholder="Amenities (AC, parking, nearby schools/metro, landmark details, etc."></textarea>
 
-        <label>Photos</label>
-        <div class="file-input-wrap">
-            <input type="file" id="photoInput" accept="image/*" multiple>
-            <p class="file-hint">Tap to choose from Gallery, Camera, or Files — select multiple at once</p>
-            <div id="photoPreview"></div>
-        </div>
+      <label><span class="icon">🖼️</span> Upload Photos</label>
+      <div class="file-input-wrap">
+        <input type="file" id="photoInput" accept="image/*" multiple />
+        <p class="file-hint">📸 Select multiple photos from gallery or camera. Max 5 photos recommended.</p>
+        <div id="photoPreview"></div>
+      </div>
 
-        <label>Your Contact Number <span class="required">*</span></label>
-        <input type="tel" name="contact" required placeholder="e.g. 98765 43210">
+      <label><span class="icon">📞</span> Your Contact Number <span class="required">*</span></label>
+      <input type="tel" name="contact" required placeholder="e.g. 98765 43210" />
 
-        <label>Should we show your number directly to renters?</label>
-        <select name="confirmation">
-            <option value="Allow">Yes — show my number (Allow)</option>
-            <option value="Call us">No — route calls through TOLET Earth (Call us)</option>
-        </select>
+      <label><span class="icon">🔐</span> Show your number directly to renters?</label>
+      <select name="confirmation">
+        <option value="Allow">✅ Yes — show my number (fast response)</option>
+        <option value="Call us">🛡️ No — route calls through TOLET Earth (privacy first)</option>
+      </select>
+      <div class="privacy-note">
+        💡 <strong>Privacy tip:</strong> If you choose "Yes", renters will see your number directly. 
+        Choose "No" if you prefer us to handle initial calls to protect your privacy.
+      </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">Submit Listing</button>
-        <p class="status-msg" id="statusMsg"></p>
+      <button type="submit" class="submit-btn" id="submitBtn">🚀 Submit Listing</button>
+      <p class="status-msg" id="statusMsg"></p>
     </form>
-</div>
+  </div>
 
-<script>
-// ⚠️ Paste your deployed Apps Script Web App URL here after deployment
-const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxOLgEsJoa-Y8UDbTWZmyQ_IIWyLmM2L_OvvLqwqBfGQkRglqadqHmi9wCDpeYyURVo/exec";
+  <footer>
+    <p>© 2025 TOLET Earth | Made with ❤️ for a broker-free world.</p>
+  </footer>
 
-const photoInput = document.getElementById("photoInput");
-const photoPreview = document.getElementById("photoPreview");
+  <script>
+    // ⚠️ IMPORTANT: Keep your Apps Script URL here
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxOLgEsJoa-Y8UDbTWZmyQ_IIWyLmM2L_OvvLqwqBfGQkRglqadqHmi9wCDpeYyURVo/exec";
 
-photoInput.addEventListener("change", function () {
-    photoPreview.innerHTML = "";
-    [...photoInput.files].forEach(file => {
+    const photoInput = document.getElementById("photoInput");
+    const photoPreview = document.getElementById("photoPreview");
+
+    photoInput.addEventListener("change", function() {
+      photoPreview.innerHTML = "";
+      [...photoInput.files].forEach(file => {
         const reader = new FileReader();
         reader.onload = e => {
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            photoPreview.appendChild(img);
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          photoPreview.appendChild(img);
         };
         reader.readAsDataURL(file);
+      });
     });
-});
 
-document.getElementById("listingForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const submitBtn = document.getElementById("submitBtn");
-    const statusMsg = document.getElementById("statusMsg");
+    document.getElementById("listingForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const submitBtn = document.getElementById("submitBtn");
+      const statusMsg = document.getElementById("statusMsg");
 
-    if (ENDPOINT_URL.indexOf("PASTE_YOUR") === 0) {
+      if (ENDPOINT_URL.indexOf("PASTE_YOUR") === 0) {
         statusMsg.className = "status-msg error";
         statusMsg.textContent = "Form isn't connected yet — add your Apps Script URL first.";
         return;
-    }
+      }
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
-    statusMsg.className = "status-msg";
-    statusMsg.textContent = "";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting... ⏳";
+      statusMsg.className = "status-msg";
+      statusMsg.textContent = "";
 
-    const formData = new FormData(e.target);
-    // Remove the raw file input's default entry and re-add each photo
-    // under its own uniquely-numbered field name.
-    formData.delete("photoInput");
-    [...photoInput.files].forEach((file, i) => {
-        formData.append(`photo_${i}`, file);
-    });
+      const formData = new FormData(e.target);
+      formData.delete("photoInput");
+      [...photoInput.files].forEach((file, i) => {
+        formData.append(photo_${i}, file);
+      });
 
-    try {
-        // Apps Script doesn't return readable CORS headers for cross-origin
-        // fetch, so we submit with no-cors and treat completion as success.
+      try {
         await fetch(ENDPOINT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            body: formData
+          method: "POST",
+          mode: "no-cors",
+          body: formData
         });
 
         statusMsg.className = "status-msg success";
         statusMsg.textContent = "✅ Submitted! Your listing will appear on the site shortly.";
         e.target.reset();
         photoPreview.innerHTML = "";
-    } catch (err) {
+      } catch (err) {
         statusMsg.className = "status-msg error";
-        statusMsg.textContent = "Something went wrong. Please try again or contact us directly.";
-    } finally {
+        statusMsg.textContent = "❌ Something went wrong. Please try again or contact us directly.";
+      } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Submit Listing";
-    }
-});
-</script>
+        submitBtn.textContent = "🚀 Submit Listing";
+      }
+    });
+  </script>
 
 </body>
 </html>
