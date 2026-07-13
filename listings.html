@@ -44,8 +44,6 @@
         margin-top: 4px;
         margin-bottom: 20px;
     }
-
-    /* Filters */
     .filters{
         display:flex;
         flex-wrap:wrap;
@@ -78,14 +76,11 @@
         font-size:14px;
     }
     .filters .clear-btn:hover{ background:var(--brand-dark); }
-
     .result-count{
         color:var(--muted);
         font-size:14px;
         margin-bottom:14px;
     }
-
-    /* Card grid */
     .grid{
         display:grid;
         grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
@@ -99,6 +94,7 @@
         display:flex;
         flex-direction:column;
         transition:transform .15s ease, box-shadow .15s ease;
+        cursor:pointer;
     }
     .card:hover{
         transform:translateY(-3px);
@@ -229,7 +225,6 @@
         border:1px solid var(--brand);
     }
     .call-btn.secondary:hover{ background:var(--brand-light); }
-
     .state-msg{
         text-align:center;
         color:var(--muted);
@@ -249,8 +244,6 @@
         font-weight:600;
     }
     .list-cta:hover{ background:var(--brand-dark); }
-
-    .card{ cursor:pointer; }
 
     /* Detail modal */
     .modal-overlay{
@@ -300,6 +293,7 @@
         align-items:center;
         justify-content:center;
         color:var(--brand);
+        cursor:pointer;
     }
     .modal-photo svg{ width:60px; height:60px; opacity:.5; }
     .modal-photo img{
@@ -325,22 +319,92 @@
         white-space:pre-wrap;
     }
     .modal-body .call-btn{ font-size:16px; padding:12px; }
+
+    /* Fullscreen lightbox */
+    .lightbox-overlay{
+        display:none;
+        position:fixed;
+        top:0; left:0; right:0; bottom:0;
+        background:rgba(0,0,0,0.92);
+        z-index:2000;
+        align-items:center;
+        justify-content:center;
+    }
+    .lightbox-overlay.open{ display:flex; }
+    .lightbox-img{
+        max-width:90vw;
+        max-height:85vh;
+        border-radius:6px;
+        object-fit:contain;
+        box-shadow:0 8px 30px rgba(0,0,0,0.5);
+    }
+    .lightbox-close{
+        position:fixed;
+        top:20px;
+        right:30px;
+        font-size:40px;
+        color:white;
+        cursor:pointer;
+        background:none;
+        border:none;
+        z-index:2001;
+        opacity:0.8;
+        transition:0.2s;
+        font-weight:300;
+    }
+    .lightbox-close:hover{ opacity:1; transform:scale(1.05); }
+    .lightbox-btn{
+        position:fixed;
+        top:50%;
+        transform:translateY(-50%);
+        background:rgba(255,255,255,0.08);
+        color:white;
+        border:none;
+        font-size:42px;
+        padding:14px 18px;
+        cursor:pointer;
+        border-radius:50%;
+        transition:0.2s;
+        backdrop-filter:blur(4px);
+        z-index:2001;
+        font-weight:300;
+    }
+    .lightbox-btn:hover{
+        background:rgba(255,255,255,0.2);
+        transform:translateY(-50%) scale(1.05);
+    }
+    .lightbox-btn.prev{ left:20px; }
+    .lightbox-btn.next{ right:20px; }
+    .lightbox-counter{
+        position:fixed;
+        bottom:25px;
+        left:50%;
+        transform:translateX(-50%);
+        color:rgba(255,255,255,0.7);
+        font-size:15px;
+        background:rgba(0,0,0,0.4);
+        padding:6px 18px;
+        border-radius:30px;
+        z-index:2001;
+        backdrop-filter:blur(4px);
+    }
+    @media (max-width:480px){
+        .lightbox-btn{ font-size:28px; padding:8px 12px; }
+        .lightbox-btn.prev{ left:8px; }
+        .lightbox-btn.next{ right:8px; }
+    }
 </style>
 </head>
 <body>
 
 <div class="container">
-<h1>Available Rental Properties<img src="Color-removebg.png" width="45" height="45" alt=""></h1>
+    <h1>Available Rental Properties<img src="Color-removebg.png" width="45" height="45" alt=""></h1>
     <p class="note">Contact owners directly — No brokers, no fees.</p>
 
     <div class="filters">
         <input type="text" id="searchInput" placeholder="Search by location, e.g. Chajju Majra, Sector 123...">
-        <select id="bhkFilter">
-            <option value="">Any BHK</option>
-        </select>
-        <select id="furnishedFilter">
-            <option value="">Any Furnishing</option>
-        </select>
+        <select id="bhkFilter"><option value="">Any BHK</option></select>
+        <select id="furnishedFilter"><option value="">Any Furnishing</option></select>
         <select id="rentFilter">
             <option value="">Any Budget</option>
             <option value="10000">Under ₹10,000</option>
@@ -352,38 +416,48 @@
     </div>
 
     <p class="result-count" id="resultCount"></p>
-
-    <div id="grid" class="grid">
-        <p class="state-msg" id="stateMsg">Loading listings…</p>
-    </div>
-
-    <a class="list-cta" href="https://docs.google.com/forms/d/e/1FAIpQLSfPQxPQHTE2G_APvAedfwIc6MOilbeQzJumYnV5wtEOlcGf3Q/viewform?usp=dialog" target="_blank">+ List Your Property</a>
+    <div id="grid" class="grid"><p class="state-msg" id="stateMsg">Loading listings…</p></div>
+    <a class="list-cta" href="list-property.html">+ List Your Property</a>
 </div>
 
+<!-- Detail Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
     <div class="modal-box">
         <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
-        <div id="modalPhotoArea"></div>
+        <div id="modalPhotoArea" onclick="openFullscreen()"></div>
         <div class="modal-body" id="modalBody"></div>
     </div>
 </div>
 
-<script>
-// ⚠️ Set this to your TOLET Earth contact number shown when an owner has chosen "Call us"
-const TOLETEARTH_CONTACT_NUMBER = "+91 92651 67835";
+<!-- Fullscreen Lightbox -->
+<div class="lightbox-overlay" id="lightboxOverlay" onclick="if(event.target===this) closeFullscreen()">
+    <button class="lightbox-close" onclick="closeFullscreen()" aria-label="Close fullscreen">✕</button>
+    <button class="lightbox-btn prev" id="lightboxPrev" onclick="event.stopPropagation(); changeFullscreen(-1)">‹</button>
+    <button class="lightbox-btn next" id="lightboxNext" onclick="event.stopPropagation(); changeFullscreen(1)">›</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="Property photo full view">
+    <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
 
+<script>
+const TOLETEARTH_CONTACT_NUMBER = "+91 92651 67835";
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWAoOb9LwodFn6MSgeZ-Xwk17xsuZpP2KzZBwt-BRoEuTcDxpKLiOSpapFG6hkQAPvd93mTmCkWKR0/pub?gid=1666116658&single=true&output=csv";
 
 let allListings = [];
+let currentPhotoSets = [];
+let currentListings = [];
+let currentModalListing = null;
+let modalPhotoIndex = 0;
+let fullscreenPhotos = [];
+let fullscreenIndex = 0;
 
 function driveIds(raw) {
     if (!raw) return [];
     const matches = raw.match(/[-\w]{25,}/g) || [];
-    return matches.map(id => `https://drive.google.com/thumbnail?id=${id}&sz=w600`);
+    return matches.map(id => https://drive.google.com/thumbnail?id=${id}&sz=w800);
 }
 
 function houseIconSVG() {
-    return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg>`;
+    return <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg>;
 }
 
 function getField(row, keywords) {
@@ -415,14 +489,12 @@ function normalizeRow(row) {
 function populateFilterOptions(listings) {
     const bhkSet = new Set(listings.map(l => l.bhk).filter(Boolean));
     const furnishedSet = new Set(listings.map(l => l.furnished).filter(Boolean));
-
     const bhkFilter = document.getElementById("bhkFilter");
     [...bhkSet].sort().forEach(v => {
         const opt = document.createElement("option");
         opt.value = v; opt.textContent = v + " BHK";
         bhkFilter.appendChild(opt);
     });
-
     const furnishedFilter = document.getElementById("furnishedFilter");
     [...furnishedSet].sort().forEach(v => {
         const opt = document.createElement("option");
@@ -431,11 +503,6 @@ function populateFilterOptions(listings) {
     });
 }
 
-let currentPhotoSets = [];
-let currentListings = [];
-let currentModalListing = null;
-let modalPhotoIndex = 0;
-
 function renderCard(l, idx) {
     const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
     const photos = l.photos;
@@ -443,15 +510,15 @@ function renderCard(l, idx) {
 
     let photoHTML;
     if (photos.length === 0) {
-        photoHTML = `<div class="card-photo">${houseIconSVG()}</div>`;
+        photoHTML = <div class="card-photo">${houseIconSVG()}</div>;
     } else if (photos.length === 1) {
-        photoHTML = `<div class="card-photo"><img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
+        photoHTML = <div class="card-photo"><img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>;
     } else {
         photoHTML = `
         <div class="card-photo" id="photo-${idx}">
             <img src="${photos[0]}" data-current="0" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
-            <button class="carousel-btn prev" onclick="changePhoto(${idx}, -1)" aria-label="Previous photo">‹</button>
-            <button class="carousel-btn next" onclick="changePhoto(${idx}, 1)" aria-label="Next photo">›</button>
+            <button class="carousel-btn prev" onclick="event.stopPropagation(); changePhoto(${idx}, -1)" aria-label="Previous photo">‹</button>
+            <button class="carousel-btn next" onclick="event.stopPropagation(); changePhoto(${idx}, 1)" aria-label="Next photo">›</button>
             <span class="carousel-count">1/${photos.length}</span>
         </div>`;
     }
@@ -463,7 +530,7 @@ function renderCard(l, idx) {
 
     const showDirect = l.confirmation === "allow" && l.contact;
     const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
-    const btnLabel = showDirect ? `Call ${l.contact}` : "Call TOLET Earth";
+    const btnLabel = showDirect ? Call ${l.contact} : "Call TOLET Earth";
     const btnClass = showDirect ? "" : "secondary";
 
     return `
@@ -474,8 +541,8 @@ function renderCard(l, idx) {
                 <div class="location">📍 ${l.location || "Location on request"}</div>
                 <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
             </div>
-            <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
-            ${l.description ? `<div class="description">${l.description}</div>` : ""}
+            <div class="tags">${tags.map(t => <span class="tag">${t}</span>).join("")}</div>
+            ${l.description ? <div class="description">${l.description}</div> : ""}
             <div class="card-footer">
                 <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}" onclick="event.stopPropagation()">${btnLabel}</a>
             </div>
@@ -486,14 +553,14 @@ function renderCard(l, idx) {
 function changePhoto(idx, direction) {
     const photos = currentPhotoSets[idx];
     if (!photos || photos.length < 2) return;
-    const container = document.getElementById(`photo-${idx}`);
+    const container = document.getElementById(photo-${idx});
     if (!container) return;
     const img = container.querySelector('img');
     let current = parseInt(img.dataset.current, 10);
     current = (current + direction + photos.length) % photos.length;
     img.dataset.current = current;
     img.src = photos[current];
-    container.querySelector('.carousel-count').textContent = `${current + 1}/${photos.length}`;
+    container.querySelector('.carousel-count').textContent = ${current + 1}/${photos.length};
 }
 
 function openModal(idx) {
@@ -501,6 +568,8 @@ function openModal(idx) {
     if (!l) return;
     modalPhotoIndex = 0;
     currentModalListing = l;
+    fullscreenPhotos = l.photos || [];
+    fullscreenIndex = 0;
 
     document.getElementById("modalPhotoArea").innerHTML = renderModalPhoto(l.photos, 0);
 
@@ -511,7 +580,7 @@ function openModal(idx) {
 
     const showDirect = l.confirmation === "allow" && l.contact;
     const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
-    const btnLabel = showDirect ? `Call ${l.contact}` : "Call TOLET Earth";
+    const btnLabel = showDirect ? Call ${l.contact} : "Call TOLET Earth";
     const btnClass = showDirect ? "" : "secondary";
 
     document.getElementById("modalBody").innerHTML = `
@@ -519,8 +588,8 @@ function openModal(idx) {
             <div class="location">📍 ${l.location || "Location on request"}</div>
             <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
         </div>
-        <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
-        ${l.description ? `<div class="description">${l.description}</div>` : `<div class="description">No additional description provided.</div>`}
+        <div class="tags">${tags.map(t => <span class="tag">${t}</span>).join("")}</div>
+        ${l.description ? <div class="description">${l.description}</div> : <div class="description">No additional description provided.</div>}
         <div class="card-footer">
             <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}">${btnLabel}</a>
         </div>
@@ -539,14 +608,14 @@ function closeModal() {
 function renderModalPhoto(photos, index) {
     const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
     if (!photos || photos.length === 0) {
-        return `<div class="modal-photo">${houseIconSVG()}</div>`;
+        return <div class="modal-photo">${houseIconSVG()}</div>;
     }
     if (photos.length === 1) {
-        return `<div class="modal-photo"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
+        return <div class="modal-photo"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>;
     }
     return `
-    <div class="modal-photo">
-        <img src="${photos[index]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
+    <div class="modal-photo" id="modalPhotoContainer">
+        <img id="modalPhotoImg" src="${photos[index]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
         <button class="carousel-btn prev" onclick="event.stopPropagation(); changeModalPhoto(-1)" aria-label="Previous photo">‹</button>
         <button class="carousel-btn next" onclick="event.stopPropagation(); changeModalPhoto(1)" aria-label="Next photo">›</button>
         <span class="carousel-count">${index + 1}/${photos.length}</span>
@@ -561,8 +630,55 @@ function changeModalPhoto(direction) {
     document.getElementById("modalPhotoArea").innerHTML = renderModalPhoto(photos, modalPhotoIndex);
 }
 
+// --- Fullscreen Lightbox Functions ---
+
+function openFullscreen() {
+    if (!currentModalListing) return;
+    const photos = currentModalListing.photos || [];
+    if (photos.length === 0) return;
+    fullscreenPhotos = photos;
+    fullscreenIndex = modalPhotoIndex;
+    renderFullscreen();
+    document.getElementById("lightboxOverlay").classList.add("open");
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", fullscreenKeyHandler);
+}
+
+function closeFullscreen() {
+    document.getElementById("lightboxOverlay").classList.remove("open");
+    document.body.style.overflow = "";
+    document.removeEventListener("keydown", fullscreenKeyHandler);
+}
+
+function renderFullscreen() {
+    const img = document.getElementById("lightboxImg");
+    const counter = document.getElementById("lightboxCounter");
+    img.src = fullscreenPhotos[fullscreenIndex] || "";
+    counter.textContent = fullscreenPhotos.length > 1 ? ${fullscreenIndex+1} / ${fullscreenPhotos.length} : "";
+    document.getElementById("lightboxPrev").style.display = fullscreenPhotos.length > 1 ? "flex" : "none";
+    document.getElementById("lightboxNext").style.display = fullscreenPhotos.length > 1 ? "flex" : "none";
+}
+
+function changeFullscreen(direction) {
+    if (!fullscreenPhotos || fullscreenPhotos.length < 2) return;
+    fullscreenIndex = (fullscreenIndex + direction + fullscreenPhotos.length) % fullscreenPhotos.length;
+    renderFullscreen();
+}
+
+function fullscreenKeyHandler(e) {
+    if (e.key === "Escape") closeFullscreen();
+    if (e.key === "ArrowLeft") changeFullscreen(-1);
+    if (e.key === "ArrowRight") changeFullscreen(1);
+}
+
 document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") closeModal();
+    if (e.key === "Escape") {
+        if (document.getElementById("lightboxOverlay").classList.contains("open")) {
+            closeFullscreen();
+        } else {
+            closeModal();
+        }
+    }
 });
 
 function applyFilters() {
@@ -583,12 +699,12 @@ function applyFilters() {
     const countEl = document.getElementById("resultCount");
 
     if (filtered.length === 0) {
-        grid.innerHTML = `<p class="state-msg">No properties match your search. Try clearing some filters.</p>`;
+        grid.innerHTML = <p class="state-msg">No properties match your search. Try clearing some filters.</p>;
         countEl.textContent = "";
         return;
     }
 
-    countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found`;
+    countEl.textContent = ${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found;
     currentPhotoSets = [];
     currentListings = filtered;
     grid.innerHTML = filtered.map((l, idx) => renderCard(l, idx)).join("");
@@ -601,14 +717,13 @@ Papa.parse(CSV_URL, {
     complete: function(results) {
         allListings = results.data
             .map(normalizeRow)
-            .filter(l => l.location || l.rent) // drop fully blank rows
-            .filter(l => l.status !== "rented"); // hide rented-out properties
+            .filter(l => l.location || l.rent)
+            .filter(l => l.status !== "rented");
 
         if (allListings.length === 0) {
             document.getElementById("stateMsg").textContent = "No listings available yet. Check back soon!";
             return;
         }
-
         populateFilterOptions(allListings);
         applyFilters();
     },
@@ -629,6 +744,5 @@ document.getElementById("clearBtn").addEventListener("click", function() {
     applyFilters();
 });
 </script>
-
 </body>
 </html>
