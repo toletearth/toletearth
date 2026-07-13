@@ -453,11 +453,11 @@ let fullscreenIndex = 0;
 function driveIds(raw) {
     if (!raw) return [];
     const matches = raw.match(/[-\w]{25,}/g) || [];
-    return matches.map(id => https://drive.google.com/thumbnail?id=${id}&sz=w800);
+    return matches.map(id => `https://drive.google.com/thumbnail?id=${id}&sz=w800`);
 }
 
 function houseIconSVG() {
-    return <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg>;
+    return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z"/></svg>`;
 }
 
 function getField(row, keywords) {
@@ -510,9 +510,9 @@ function renderCard(l, idx) {
 
     let photoHTML;
     if (photos.length === 0) {
-        photoHTML = <div class="card-photo">${houseIconSVG()}</div>;
+        photoHTML = `<div class="card-photo">${houseIconSVG()}</div>`;
     } else if (photos.length === 1) {
-        photoHTML = <div class="card-photo"><img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>;
+        photoHTML = `<div class="card-photo"><img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
     } else {
         photoHTML = `
         <div class="card-photo" id="photo-${idx}">
@@ -530,7 +530,7 @@ function renderCard(l, idx) {
 
     const showDirect = l.confirmation === "allow" && l.contact;
     const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
-    const btnLabel = showDirect ? Call ${l.contact} : "Call TOLET Earth";
+    const btnLabel = showDirect ? `Call ${l.contact}` : "Call TOLET Earth";
     const btnClass = showDirect ? "" : "secondary";
 
     return `
@@ -541,8 +541,8 @@ function renderCard(l, idx) {
                 <div class="location">📍 ${l.location || "Location on request"}</div>
                 <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
             </div>
-            <div class="tags">${tags.map(t => <span class="tag">${t}</span>).join("")}</div>
-            ${l.description ? <div class="description">${l.description}</div> : ""}
+            <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+            ${l.description ? `<div class="description">${l.description}</div>` : ""}
             <div class="card-footer">
                 <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}" onclick="event.stopPropagation()">${btnLabel}</a>
             </div>
@@ -553,14 +553,14 @@ function renderCard(l, idx) {
 function changePhoto(idx, direction) {
     const photos = currentPhotoSets[idx];
     if (!photos || photos.length < 2) return;
-    const container = document.getElementById(photo-${idx});
+    const container = document.getElementById(`photo-${idx}`);
     if (!container) return;
     const img = container.querySelector('img');
     let current = parseInt(img.dataset.current, 10);
     current = (current + direction + photos.length) % photos.length;
     img.dataset.current = current;
     img.src = photos[current];
-    container.querySelector('.carousel-count').textContent = ${current + 1}/${photos.length};
+    container.querySelector('.carousel-count').textContent = `${current + 1}/${photos.length}`;
 }
 
 function openModal(idx) {
@@ -580,7 +580,7 @@ function openModal(idx) {
 
     const showDirect = l.confirmation === "allow" && l.contact;
     const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
-    const btnLabel = showDirect ? Call ${l.contact} : "Call TOLET Earth";
+    const btnLabel = showDirect ? `Call ${l.contact}` : "Call TOLET Earth";
     const btnClass = showDirect ? "" : "secondary";
 
     document.getElementById("modalBody").innerHTML = `
@@ -588,8 +588,8 @@ function openModal(idx) {
             <div class="location">📍 ${l.location || "Location on request"}</div>
             <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
         </div>
-        <div class="tags">${tags.map(t => <span class="tag">${t}</span>).join("")}</div>
-        ${l.description ? <div class="description">${l.description}</div> : <div class="description">No additional description provided.</div>}
+        <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+        ${l.description ? `<div class="description">${l.description}</div>` : `<div class="description">No additional description provided.</div>`}
         <div class="card-footer">
             <a class="call-btn ${btnClass}" href="tel:${phoneNumber.replace(/\s/g,'')}">${btnLabel}</a>
         </div>
@@ -608,10 +608,10 @@ function closeModal() {
 function renderModalPhoto(photos, index) {
     const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
     if (!photos || photos.length === 0) {
-        return <div class="modal-photo">${houseIconSVG()}</div>;
+        return `<div class="modal-photo">${houseIconSVG()}</div>`;
     }
     if (photos.length === 1) {
-        return <div class="modal-photo"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>;
+        return `<div class="modal-photo"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
     }
     return `
     <div class="modal-photo" id="modalPhotoContainer">
@@ -654,7 +654,7 @@ function renderFullscreen() {
     const img = document.getElementById("lightboxImg");
     const counter = document.getElementById("lightboxCounter");
     img.src = fullscreenPhotos[fullscreenIndex] || "";
-    counter.textContent = fullscreenPhotos.length > 1 ? ${fullscreenIndex+1} / ${fullscreenPhotos.length} : "";
+    counter.textContent = fullscreenPhotos.length > 1 ? `${fullscreenIndex+1} / ${fullscreenPhotos.length}` : "";
     document.getElementById("lightboxPrev").style.display = fullscreenPhotos.length > 1 ? "flex" : "none";
     document.getElementById("lightboxNext").style.display = fullscreenPhotos.length > 1 ? "flex" : "none";
 }
@@ -699,12 +699,12 @@ function applyFilters() {
     const countEl = document.getElementById("resultCount");
 
     if (filtered.length === 0) {
-        grid.innerHTML = <p class="state-msg">No properties match your search. Try clearing some filters.</p>;
+        grid.innerHTML = `<p class="state-msg">No properties match your search. Try clearing some filters.</p>`;
         countEl.textContent = "";
         return;
     }
 
-    countEl.textContent = ${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found;
+    countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found`;
     currentPhotoSets = [];
     currentListings = filtered;
     grid.innerHTML = filtered.map((l, idx) => renderCard(l, idx)).join("");
