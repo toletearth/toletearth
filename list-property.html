@@ -331,7 +331,7 @@
       const formData = new FormData(e.target);
       formData.delete("photoInput");
       [...photoInput.files].forEach((file, i) => {
-        formData.append(photo_${i}, file);
+        formData.append(`photo_${i}`, file);
       });
 
       try {
