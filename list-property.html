@@ -294,7 +294,7 @@
 
   <script>
     // ⚠️ IMPORTANT: Keep your Apps Script URL here
-    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzpzur0ePyiJ1GsPjL_AvCJuiHEq28mEtU6Z6hro6JOL7eZus_Rc3hDYbibcYEfWm4zLQ/exec";
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxOLgEsJoa-Y8UDbTWZmyQ_IIWyLmM2L_OvvLqwqBfGQkRglqadqHmi9wCDpeYyURVo/exec";
 
     const photoInput = document.getElementById("photoInput");
     const photoPreview = document.getElementById("photoPreview");
@@ -324,17 +324,35 @@
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting... ⏳";
+      submitBtn.textContent = "Uploading photos... ⏳";
       statusMsg.className = "status-msg";
       statusMsg.textContent = "";
 
       const formData = new FormData(e.target);
       formData.delete("photoInput");
-      [...photoInput.files].forEach((file, i) => {
-        formData.append(`photo_${i}`, file);
-      });
+
+      // Convert each photo to base64 text instead of sending as a raw file —
+      // Apps Script's e.files is unreliable with fetch()-based multipart
+      // uploads, but reading plain text parameters works consistently.
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
 
       try {
+        const photosData = [];
+        for (const file of photoInput.files) {
+          const base64 = await fileToBase64(file);
+          photosData.push({ data: base64, name: file.name, type: file.type });
+        }
+        formData.append("photosJson", JSON.stringify(photosData));
+
+        submitBtn.textContent = "Submitting... ⏳";
+
         await fetch(ENDPOINT_URL, {
           method: "POST",
           mode: "no-cors",
