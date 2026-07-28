@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TOLET Earth – Free, broker-free rental platform in Chandigarh, Mohali, and Panchkula. Verified listings, direct owner contact.">
   <title>TOLET Earth – Rent Freely, Live Peacefully</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
@@ -21,6 +22,25 @@
       padding: 1rem 2rem;
       text-align: center;
     }
+    .brand-to {
+      color: white;
+      font-weight: 700;
+    }
+    .brand-let {
+      color: #A3C6E1; /* Pastel / chalk blue */
+      font-weight: 800;
+    }
+    .brand-earth {
+      color: white;
+      font-weight: 700;
+    }
+    .tagline {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.85);
+      margin-top: 2px;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
     nav {
       display: flex;
       justify-content: center;
@@ -33,17 +53,28 @@
       text-decoration: none;
       font-weight: bold;
     }
+    nav a:hover {
+      text-decoration: underline;
+    }
     .hero {
       text-align: center;
       padding: 3rem 1rem;
       background: url('Flowers%20Add.JPG') no-repeat center/cover;
-      color: #0FFF50;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.8); /* Darker shadow for better readability */
+      color: #ffffff;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
       min-height: 400px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+    }
+    .hero h2 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
     }
     .container {
       max-width: 1100px;
@@ -56,6 +87,20 @@
       margin: 1rem 0;
       border-radius: 10px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #2d5c7f;
+      color: white;
+      cursor: pointer;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: background 0.2s, transform 0.1s;
+    }
+    button:hover {
+      background: #1e4568;
+      transform: scale(1.02);
     }
     footer {
       text-align: center;
@@ -71,30 +116,24 @@
       max-width: 500px;
       margin: auto;
     }
-    input, textarea, button {
+    input, textarea {
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
-    }
-    button {
-      background: #2d5c7f;
-      color: white;
-      cursor: pointer;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #1e4568;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>TOLET Earth<img src="Color-removebg.png" width="45" height="45" alt="TOLET Earth Logo"></h1>
-    <p>Rent Freely. Connect Globally.</p>
+    <h1 style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2px;">
+      <span style="font-size: 2.2rem; letter-spacing: 1px;">
+        <span class="brand-to">TO</span><span class="brand-let">LET</span>
+        <span class="brand-earth">Earth</span>
+      </span>
+      <img src="Color-removebg.png" width="45" height="45" alt="TOLET Earth Logo">
+    </h1>
+    <div class="tagline">Rent freely. Connect directly. No brokers.</div>
   </header>
 
   <nav>
@@ -128,8 +167,8 @@
       <h2>For Homeowners</h2>
       <p>List your property in less than 2 minutes.</p>
       <a href="list-property.html">
-  <button>List Your Property 🏠</button>
-</a>
+        <button>List Your Property 🏠</button>
+      </a>
     </section>
 
     <section class="card">
@@ -139,7 +178,7 @@
         <button>Browse Listings 🏠</button>
       </a>
     </section>
-  </div> <!-- This closing div was missing -->
+  </div>
 
   <footer>
     <p>Made with ❤️ for a happier, broker-free world.</p>
@@ -148,6 +187,3 @@
 
 </body>
 </html>
-
-
-
