@@ -1,445 +1,453 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rental Listings - ToletEarth</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-<style>
-    :root{
-        --brand:#2d5c7f;
-        --brand-dark:#204a68;
-        --brand-light:#e8f0f6;
-        --bg:#f9f9f9;
-        --text:#333;
-        --muted:#666;
-        --line:#e3e6e9;
-    }
-    *{box-sizing:border-box;}
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: var(--bg);
-        color: var(--text);
-    }
-    .container {
-        max-width: 1100px;
-        margin: 0 auto;
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    h1 {
-        color: var(--brand);
-        text-align: center;
-        margin-bottom: 4px;
-    }
-    h1 img{ vertical-align: middle; margin-left: 8px; }
-    .note {
-        text-align: center;
-        font-style: italic;
-        color: var(--muted);
-        margin-top: 4px;
-        margin-bottom: 20px;
-    }
-    .filters{
-        display:flex;
-        flex-wrap:wrap;
-        gap:10px;
-        background:var(--brand-light);
-        padding:14px;
-        border-radius:8px;
-        margin-bottom:20px;
-        align-items:center;
-    }
-    .filters input, .filters select{
-        font-family:inherit;
-        font-size:14px;
-        padding:8px 10px;
-        border:1px solid var(--line);
-        border-radius:6px;
-        background:white;
-        color:var(--text);
-    }
-    .filters input[type="text"]{ flex:1 1 220px; }
-    .filters select{ flex:0 1 140px; }
-    .filters .clear-btn{
-        flex:0 0 auto;
-        background:var(--brand);
-        color:white;
-        border:none;
-        cursor:pointer;
-        padding:8px 14px;
-        border-radius:6px;
-        font-size:14px;
-    }
-    .filters .clear-btn:hover{ background:var(--brand-dark); }
-    .result-count{
-        color:var(--muted);
-        font-size:14px;
-        margin-bottom:14px;
-    }
-    .grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-        gap:18px;
-    }
-    .card{
-        border:1px solid var(--line);
-        border-radius:10px;
-        overflow:hidden;
-        background:white;
-        display:flex;
-        flex-direction:column;
-        transition:transform .15s ease, box-shadow .15s ease;
-        cursor:pointer;
-    }
-    .card:hover{
-        transform:translateY(-3px);
-        box-shadow:0 6px 14px rgba(0,0,0,0.12);
-    }
-    .card-photo{
-        width:100%;
-        height:160px;
-        background:var(--brand-light) center/cover no-repeat;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:var(--brand);
-        font-size:13px;
-        position:relative;
-    }
-    .card-photo svg{ width:40px; height:40px; opacity:.5; }
-    .card-photo img{
-        width:100%;
-        height:100%;
-        object-fit:cover;
-        display:block;
-    }
-    .carousel-btn{
-        position:absolute;
-        top:50%;
-        transform:translateY(-50%);
-        width:26px;
-        height:26px;
-        border-radius:50%;
-        border:none;
-        background:rgba(0,0,0,0.45);
-        color:white;
-        font-size:16px;
-        line-height:1;
-        cursor:pointer;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-    }
-    .carousel-btn:hover{ background:rgba(0,0,0,0.65); }
-    .carousel-btn.prev{ left:6px; }
-    .carousel-btn.next{ right:6px; }
-    .carousel-count{
-        position:absolute;
-        bottom:6px;
-        right:8px;
-        background:rgba(0,0,0,0.55);
-        color:white;
-        font-size:11px;
-        padding:2px 7px;
-        border-radius:10px;
-    }
-    .card-body{
-        padding:14px;
-        display:flex;
-        flex-direction:column;
-        gap:8px;
-        flex:1;
-    }
-    .card-top{
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:8px;
-    }
-    .rent{
-        font-size:19px;
-        font-weight:700;
-        color:var(--brand);
-        white-space:nowrap;
-    }
-    .rent span{
-        font-size:12px;
-        font-weight:400;
-        color:var(--muted);
-    }
-    .tags{
-        display:flex;
-        flex-wrap:wrap;
-        gap:6px;
-    }
-    .tag{
-        background:var(--brand-light);
-        color:var(--brand-dark);
-        font-size:12px;
-        padding:3px 8px;
-        border-radius:20px;
-        white-space:nowrap;
-    }
-    .location{
-        font-size:14px;
-        color:var(--text);
-        font-weight:600;
-        display:flex;
-        gap:6px;
-        align-items:flex-start;
-    }
-    .description{
-        font-size:13px;
-        color:var(--muted);
-        line-height:1.4;
-        display:-webkit-box;
-        -webkit-line-clamp:2;
-        -webkit-box-orient:vertical;
-        overflow:hidden;
-    }
-    .card-footer{
-        margin-top:auto;
-        padding-top:8px;
-        border-top:1px solid var(--line);
-    }
-    .call-btn{
-        display:block;
-        text-align:center;
-        background:var(--brand);
-        color:white;
-        text-decoration:none;
-        padding:9px;
-        border-radius:6px;
-        font-size:14px;
-        font-weight:600;
-    }
-    .call-btn:hover{ background:var(--brand-dark); }
-    .call-btn.secondary{
-        background:white;
-        color:var(--brand);
-        border:1px solid var(--brand);
-    }
-    .call-btn.secondary:hover{ background:var(--brand-light); }
-    .state-msg{
-        text-align:center;
-        color:var(--muted);
-        padding:40px 10px;
-        font-size:15px;
-    }
-    .list-cta{
-        display:block;
-        max-width:260px;
-        margin:20px auto 0;
-        text-align:center;
-        background:var(--brand);
-        color:white;
-        text-decoration:none;
-        padding:12px;
-        border-radius:8px;
-        font-weight:600;
-    }
-    .list-cta:hover{ background:var(--brand-dark); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental & Sale Listings - ToletEarth</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        :root{
+            --brand:#2d5c7f;
+            --brand-dark:#204a68;
+            --brand-light:#e8f0f6;
+            --bg:#f9f9f9;
+            --text:#333;
+            --muted:#666;
+            --line:#e3e6e9;
+        }
+        *{box-sizing:border-box;}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: var(--brand);
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        h1 img{ vertical-align: middle; margin-left: 8px; }
+        .note {
+            text-align: center;
+            font-style: italic;
+            color: var(--muted);
+            margin-top: 4px;
+            margin-bottom: 16px;
+        }
 
-    /* Detail modal */
-    .modal-overlay{
-        display:none;
-        position:fixed;
-        top:0; left:0; right:0; bottom:0;
-        background:rgba(0,0,0,0.6);
-        z-index:1000;
-        align-items:flex-start;
-        justify-content:center;
-        overflow-y:auto;
-        padding:20px 12px;
-    }
-    .modal-overlay.open{ display:flex; }
-    .modal-box{
-        background:white;
-        border-radius:12px;
-        max-width:560px;
-        width:100%;
-        overflow:hidden;
-        position:relative;
-        margin-top:20px;
-    }
-    .modal-close{
-        position:absolute;
-        top:10px;
-        right:10px;
-        width:34px;
-        height:34px;
-        border-radius:50%;
-        border:none;
-        background:rgba(0,0,0,0.55);
-        color:white;
-        font-size:20px;
-        cursor:pointer;
-        z-index:5;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-    }
-    .modal-photo{
-        width:100%;
-        height:280px;
-        background:var(--brand-light);
-        position:relative;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:var(--brand);
-        cursor:pointer;
-    }
-    .modal-photo svg{ width:60px; height:60px; opacity:.5; }
-    .modal-photo img{
-        width:100%;
-        height:100%;
-        object-fit:cover;
-        display:block;
-    }
-    .modal-body{
-        padding:20px;
-        display:flex;
-        flex-direction:column;
-        gap:12px;
-    }
-    .modal-body .location{ font-size:18px; }
-    .modal-body .rent{ font-size:24px; }
-    .modal-body .description{
-        -webkit-line-clamp:unset;
-        display:block;
-        overflow:visible;
-        font-size:14px;
-        line-height:1.6;
-        white-space:pre-wrap;
-    }
-    .modal-body .call-btn{ font-size:16px; padding:12px; }
+        /* Listing type tabs (Rent / Sale / All) */
+        .type-tabs{
+            display:flex;
+            gap:10px;
+            justify-content:center;
+            margin-bottom:18px;
+            flex-wrap:wrap;
+        }
+        .type-tab{
+            padding:9px 22px;
+            border:2px solid var(--line);
+            border-radius:30px;
+            background:white;
+            cursor:pointer;
+            font-weight:600;
+            font-size:14px;
+            color:var(--text);
+        }
+        .type-tab.active{
+            background:var(--brand);
+            color:white;
+            border-color:var(--brand);
+        }
 
-    /* Fullscreen lightbox */
-    .lightbox-overlay{
-        display:none;
-        position:fixed;
-        top:0; left:0; right:0; bottom:0;
-        background:rgba(0,0,0,0.92);
-        z-index:2000;
-        align-items:center;
-        justify-content:center;
-    }
-    .lightbox-overlay.open{ display:flex; }
-    .lightbox-img{
-        max-width:90vw;
-        max-height:85vh;
-        border-radius:6px;
-        object-fit:contain;
-        box-shadow:0 8px 30px rgba(0,0,0,0.5);
-    }
-    .lightbox-close{
-        position:fixed;
-        top:20px;
-        right:30px;
-        font-size:40px;
-        color:white;
-        cursor:pointer;
-        background:none;
-        border:none;
-        z-index:2001;
-        opacity:0.8;
-        transition:0.2s;
-        font-weight:300;
-    }
-    .lightbox-close:hover{ opacity:1; transform:scale(1.05); }
-    .lightbox-btn{
-        position:fixed;
-        top:50%;
-        transform:translateY(-50%);
-        background:rgba(255,255,255,0.08);
-        color:white;
-        border:none;
-        font-size:42px;
-        padding:14px 18px;
-        cursor:pointer;
-        border-radius:50%;
-        transition:0.2s;
-        backdrop-filter:blur(4px);
-        z-index:2001;
-        font-weight:300;
-    }
-    .lightbox-btn:hover{
-        background:rgba(255,255,255,0.2);
-        transform:translateY(-50%) scale(1.05);
-    }
-    .lightbox-btn.prev{ left:20px; }
-    .lightbox-btn.next{ right:20px; }
-    .lightbox-counter{
-        position:fixed;
-        bottom:25px;
-        left:50%;
-        transform:translateX(-50%);
-        color:rgba(255,255,255,0.7);
-        font-size:15px;
-        background:rgba(0,0,0,0.4);
-        padding:6px 18px;
-        border-radius:30px;
-        z-index:2001;
-        backdrop-filter:blur(4px);
-    }
-    @media (max-width:480px){
-        .lightbox-btn{ font-size:28px; padding:8px 12px; }
-        .lightbox-btn.prev{ left:8px; }
-        .lightbox-btn.next{ right:8px; }
-    }
-</style>
+        /* Filters */
+        .filters{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            background:var(--brand-light);
+            padding:14px;
+            border-radius:8px;
+            margin-bottom:20px;
+            align-items:center;
+        }
+        .filters input, .filters select{
+            font-family:inherit;
+            font-size:14px;
+            padding:8px 10px;
+            border:1px solid var(--line);
+            border-radius:6px;
+            background:white;
+            color:var(--text);
+        }
+        .filters input[type="text"]{ flex:1 1 220px; }
+        .filters select{ flex:0 1 160px; }
+        .filters .clear-btn{
+            flex:0 0 auto;
+            background:var(--brand);
+            color:white;
+            border:none;
+            cursor:pointer;
+            padding:8px 14px;
+            border-radius:6px;
+            font-size:14px;
+        }
+        .filters .clear-btn:hover{ background:var(--brand-dark); }
+
+        .result-count{
+            color:var(--muted);
+            font-size:14px;
+            margin-bottom:14px;
+        }
+
+        /* Card grid */
+        .grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+            gap:18px;
+        }
+        .card{
+            border:1px solid var(--line);
+            border-radius:10px;
+            overflow:hidden;
+            background:white;
+            display:flex;
+            flex-direction:column;
+            transition:transform .15s ease, box-shadow .15s ease;
+            cursor:pointer;
+        }
+        .card:hover{
+            transform:translateY(-3px);
+            box-shadow:0 6px 14px rgba(0,0,0,0.12);
+        }
+        .card-photo{
+            width:100%;
+            height:160px;
+            background:var(--brand-light) center/cover no-repeat;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:var(--brand);
+            font-size:13px;
+            position:relative;
+        }
+        .card-photo svg{ width:40px; height:40px; opacity:.5; }
+        .card-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            display:block;
+        }
+        .carousel-btn{
+            position:absolute;
+            top:50%;
+            transform:translateY(-50%);
+            width:26px;
+            height:26px;
+            border-radius:50%;
+            border:none;
+            background:rgba(0,0,0,0.45);
+            color:white;
+            font-size:16px;
+            line-height:1;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .carousel-btn:hover{ background:rgba(0,0,0,0.65); }
+        .carousel-btn.prev{ left:6px; }
+        .carousel-btn.next{ right:6px; }
+        .carousel-count{
+            position:absolute;
+            bottom:6px;
+            right:8px;
+            background:rgba(0,0,0,0.55);
+            color:white;
+            font-size:11px;
+            padding:2px 7px;
+            border-radius:10px;
+        }
+        .sale-badge{
+            position:absolute;
+            top:8px;
+            left:8px;
+            background:#b45309;
+            color:white;
+            font-size:11px;
+            font-weight:700;
+            padding:3px 9px;
+            border-radius:20px;
+            letter-spacing:.3px;
+        }
+        .featured-badge{
+            position:absolute;
+            top:8px;
+            right:8px;
+            background:linear-gradient(135deg,#f2a93b,#d4881f);
+            color:white;
+            font-size:11px;
+            font-weight:700;
+            padding:3px 9px;
+            border-radius:20px;
+            letter-spacing:.3px;
+        }
+        .card.is-featured{
+            border-color:#f2a93b;
+            box-shadow:0 0 0 2px #fdeecb;
+        }
+        .card-body{
+            padding:14px;
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            flex:1;
+        }
+        .card-top{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:8px;
+        }
+        .rent{
+            font-size:19px;
+            font-weight:700;
+            color:var(--brand);
+            white-space:nowrap;
+        }
+        .rent span{
+            font-size:12px;
+            font-weight:400;
+            color:var(--muted);
+        }
+        .tags{
+            display:flex;
+            flex-wrap:wrap;
+            gap:6px;
+        }
+        .tag{
+            background:var(--brand-light);
+            color:var(--brand-dark);
+            font-size:12px;
+            padding:3px 8px;
+            border-radius:20px;
+            white-space:nowrap;
+        }
+        .location{
+            font-size:14px;
+            color:var(--text);
+            font-weight:600;
+            display:flex;
+            gap:6px;
+            align-items:flex-start;
+        }
+        .description{
+            font-size:13px;
+            color:var(--muted);
+            line-height:1.4;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+        }
+        .card-footer{
+            margin-top:auto;
+            padding-top:8px;
+            border-top:1px solid var(--line);
+        }
+        .call-btn{
+            display:block;
+            text-align:center;
+            background:var(--brand);
+            color:white;
+            text-decoration:none;
+            padding:9px;
+            border-radius:6px;
+            font-size:14px;
+            font-weight:600;
+        }
+        .call-btn:hover{ background:var(--brand-dark); }
+        .call-btn.secondary{
+            background:white;
+            color:var(--brand);
+            border:1px solid var(--brand);
+        }
+        .call-btn.secondary:hover{ background:var(--brand-light); }
+
+        .state-msg{
+            text-align:center;
+            color:var(--muted);
+            padding:40px 10px;
+            font-size:15px;
+        }
+        .list-cta{
+            display:block;
+            max-width:260px;
+            margin:20px auto 0;
+            text-align:center;
+            background:var(--brand);
+            color:white;
+            text-decoration:none;
+            padding:12px;
+            border-radius:8px;
+            font-weight:600;
+        }
+        .list-cta:hover{ background:var(--brand-dark); }
+
+        /* Modal */
+        .modal-overlay{
+            display:none;
+            position:fixed;
+            top:0; left:0; right:0; bottom:0;
+            background:rgba(0,0,0,0.6);
+            z-index:1000;
+            align-items:center;
+            justify-content:center;
+            padding:16px;
+        }
+        .modal-overlay.open{ display:flex; }
+        .modal-box{
+            background:white;
+            border-radius:12px;
+            max-width:520px;
+            width:100%;
+            max-height:90vh;
+            overflow-y:auto;
+            position:relative;
+        }
+        .modal-close{
+            position:absolute;
+            top:10px;
+            right:10px;
+            width:34px;
+            height:34px;
+            border-radius:50%;
+            border:none;
+            background:rgba(0,0,0,0.5);
+            color:white;
+            font-size:20px;
+            cursor:pointer;
+            z-index:5;
+        }
+        .modal-photo{
+            width:100%;
+            height:340px;
+            background:#111;
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:var(--brand);
+            cursor:zoom-in;
+        }
+        .modal-photo svg{ width:60px; height:60px; opacity:.5; }
+        .modal-photo img{
+            width:100%;
+            height:100%;
+            object-fit:contain;
+            display:block;
+        }
+        .modal-body{
+            padding:16px;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+
+        /* Full-screen image viewer */
+        .lightbox{
+            display:none;
+            position:fixed;
+            top:0; left:0; right:0; bottom:0;
+            background:rgba(0,0,0,0.92);
+            z-index:2000;
+            align-items:center;
+            justify-content:center;
+        }
+        .lightbox.open{ display:flex; }
+        .lightbox img{
+            max-width:94vw;
+            max-height:90vh;
+            object-fit:contain;
+        }
+        .lightbox .modal-close{ top:16px; right:16px; }
+        .lightbox .carousel-btn{
+            width:44px;
+            height:44px;
+            font-size:24px;
+        }
+        .lightbox .carousel-btn.prev{ left:16px; }
+        .lightbox .carousel-btn.next{ right:16px; }
+    </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Available Rental Properties<img src="Color-removebg.png" width="45" height="45" alt=""></h1>
-    <p class="note">Contact owners directly — No brokers, no fees.</p>
+    <div class="container">
+        <h1>Available Properties<img src="Color-removebg.png" width="45" height="45" alt=""></h1>
+        <p class="note">Contact owners directly — No brokers, no fees.</p>
 
-    <div class="filters">
-        <input type="text" id="searchInput" placeholder="Search by location, e.g. Chajju Majra, Sector 123...">
-        <select id="bhkFilter"><option value="">Any BHK</option></select>
-        <select id="furnishedFilter"><option value="">Any Furnishing</option></select>
-        <select id="rentFilter">
-            <option value="">Any Budget</option>
-            <option value="10000">Under ₹10,000</option>
-            <option value="15000">Under ₹15,000</option>
-            <option value="20000">Under ₹20,000</option>
-            <option value="30000">Under ₹30,000</option>
-        </select>
-        <button class="clear-btn" id="clearBtn">Clear</button>
+        <div class="type-tabs">
+            <button class="type-tab active" data-type="Rent" onclick="setListingTypeFilter('Rent')">🏠 For Rent</button>
+            <button class="type-tab" data-type="Sale" onclick="setListingTypeFilter('Sale')">💰 For Sale</button>
+            <button class="type-tab" data-type="All" onclick="setListingTypeFilter('All')">📋 All</button>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchInput" placeholder="Search by location, e.g. Chajju Majra, Sector 123...">
+            <select id="bhkFilter">
+                <option value="">Any BHK</option>
+            </select>
+            <select id="furnishedFilter">
+                <option value="">Any Furnishing</option>
+            </select>
+            <select id="preferenceFilter">
+                <option value="">Any Tenant Preference</option>
+            </select>
+            <select id="rentFilter">
+                <option value="">Any Budget</option>
+                <option value="10000">Under ₹10,000</option>
+                <option value="15000">Under ₹15,000</option>
+                <option value="20000">Under ₹20,000</option>
+                <option value="30000">Under ₹30,000</option>
+            </select>
+            <button class="clear-btn" id="clearBtn">Clear</button>
+        </div>
+
+        <p class="result-count" id="resultCount"></p>
+
+        <div id="grid" class="grid">
+            <p class="state-msg" id="stateMsg">Loading listings…</p>
+        </div>
+
+        <a class="list-cta" href="list-property.html">+ List Your Property</a>
     </div>
 
-    <p class="result-count" id="resultCount"></p>
-    <div id="grid" class="grid"><p class="state-msg" id="stateMsg">Loading listings…</p></div>
-    <a class="list-cta" href="list-property.html">+ List Your Property</a>
-</div>
-
-<!-- Detail Modal -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
-    <div class="modal-box">
-        <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
-        <div id="modalPhotoArea" onclick="openFullscreen()"></div>
-        <div class="modal-body" id="modalBody"></div>
+    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()" aria-label="Close">&times;</button>
+            <div id="modalPhotoArea"></div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
     </div>
-</div>
 
-<!-- Fullscreen Lightbox -->
-<div class="lightbox-overlay" id="lightboxOverlay" onclick="if(event.target===this) closeFullscreen()">
-    <button class="lightbox-close" onclick="closeFullscreen()" aria-label="Close fullscreen">✕</button>
-    <button class="lightbox-btn prev" id="lightboxPrev" onclick="event.stopPropagation(); changeFullscreen(-1)">‹</button>
-    <button class="lightbox-btn next" id="lightboxNext" onclick="event.stopPropagation(); changeFullscreen(1)">›</button>
-    <img class="lightbox-img" id="lightboxImg" src="" alt="Property photo full view">
-    <div class="lightbox-counter" id="lightboxCounter"></div>
-</div>
+    <div class="lightbox" id="lightbox" onclick="if(event.target===this) closeLightbox()">
+        <button class="modal-close" onclick="closeLightbox()" aria-label="Close full image">&times;</button>
+        <div id="lightboxContent"></div>
+    </div>
 
 <script>
+// ⚠️ Set this to your TOLET Earth contact number shown when an owner has chosen "Call us"
 const TOLETEARTH_CONTACT_NUMBER = "+91 92651 67835";
+
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTWAoOb9LwodFn6MSgeZ-Xwk17xsuZpP2KzZBwt-BRoEuTcDxpKLiOSpapFG6hkQAPvd93mTmCkWKR0/pub?gid=1666116658&single=true&output=csv";
 
 let allListings = [];
@@ -447,13 +455,12 @@ let currentPhotoSets = [];
 let currentListings = [];
 let currentModalListing = null;
 let modalPhotoIndex = 0;
-let fullscreenPhotos = [];
-let fullscreenIndex = 0;
+let currentTypeFilter = 'Rent';
 
 function driveIds(raw) {
     if (!raw) return [];
     const matches = raw.match(/[-\w]{25,}/g) || [];
-    return matches.map(id => `https://drive.google.com/thumbnail?id=${id}&sz=w800`);
+    return matches.map(id => `https://drive.google.com/thumbnail?id=${id}&sz=w600`);
 }
 
 function houseIconSVG() {
@@ -470,52 +477,116 @@ function getField(row, keywords) {
     return "";
 }
 
+// Separate helper because "Featured" and "Featured Until" both contain the
+// word "featured" — simple keyword matching alone can't tell them apart.
+function getFeaturedFields(row) {
+    let featured = "";
+    let featuredUntil = "";
+    for (const key of Object.keys(row)) {
+        const nk = key.replace(/\s+/g, ' ').trim().toLowerCase();
+        if (nk.indexOf('featured until') !== -1) {
+            featuredUntil = (row[key] || "").trim();
+        } else if (nk.indexOf('featured') !== -1) {
+            featured = (row[key] || "").trim();
+        }
+    }
+    return { featured, featuredUntil };
+}
+
+function isFeaturedActive(l) {
+    if (!l.featured || l.featured.toLowerCase() !== "yes") return false;
+    if (!l.featuredUntil) return true; // no expiry set — treat as active
+    const until = new Date(l.featuredUntil);
+    if (isNaN(until.getTime())) return true; // unparseable date — don't punish the listing
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return until >= startOfToday;
+}
+
 function normalizeRow(row) {
+    const ff = getFeaturedFields(row);
     return {
         owner: getField(row, ["owner"]),
+        listingType: getField(row, ["listing type"]) || "Rent",
         type: getField(row, ["property type"]),
         location: getField(row, ["address", "locality"]),
         rent: parseInt(getField(row, ["rent"]).replace(/[^\d]/g, "")) || 0,
+        price: parseInt(getField(row, ["sale price"]).replace(/[^\d]/g, "")) || 0,
+        area: getField(row, ["carpet area"]),
+        age: getField(row, ["age of property"]),
+        possession: getField(row, ["possession"]),
         bhk: getField(row, ["bhk"]),
         furnished: getField(row, ["furnished"]),
+        preference: getField(row, ["preference", "preferred tenant"]),
         description: getField(row, ["description"]),
         photos: driveIds(getField(row, ["photo", "upload"])),
         contact: getField(row, ["contact"]),
         confirmation: getField(row, ["confirmation", "confirmaion"]).toLowerCase(),
-        status: getField(row, ["status"]).toLowerCase()
+        status: getField(row, ["status"]).toLowerCase(),
+        featured: ff.featured,
+        featuredUntil: ff.featuredUntil
     };
 }
 
 function populateFilterOptions(listings) {
     const bhkSet = new Set(listings.map(l => l.bhk).filter(Boolean));
     const furnishedSet = new Set(listings.map(l => l.furnished).filter(Boolean));
+    const preferenceSet = new Set(listings.map(l => l.preference).filter(Boolean));
+
     const bhkFilter = document.getElementById("bhkFilter");
     [...bhkSet].sort().forEach(v => {
         const opt = document.createElement("option");
         opt.value = v; opt.textContent = v + " BHK";
         bhkFilter.appendChild(opt);
     });
+
     const furnishedFilter = document.getElementById("furnishedFilter");
     [...furnishedSet].sort().forEach(v => {
         const opt = document.createElement("option");
         opt.value = v; opt.textContent = v;
         furnishedFilter.appendChild(opt);
     });
+
+    const preferenceFilter = document.getElementById("preferenceFilter");
+    [...preferenceSet].sort().forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        preferenceFilter.appendChild(opt);
+    });
+}
+
+function setListingTypeFilter(type) {
+    currentTypeFilter = type;
+    document.querySelectorAll(".type-tab").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.type === type);
+    });
+    applyFilters();
+}
+
+function priceBlockHTML(l) {
+    if (l.listingType === "Sale") {
+        return `<div class="rent">₹${l.price ? l.price.toLocaleString("en-IN") : "—"}</div>`;
+    }
+    return `<div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>`;
 }
 
 function renderCard(l, idx) {
     const fallbackIcon = houseIconSVG().replace(/'/g, "\\'");
     const photos = l.photos;
     currentPhotoSets[idx] = photos;
+    const featured = isFeaturedActive(l);
 
     let photoHTML;
+    const saleBadge = l.listingType === "Sale" ? `<span class="sale-badge">FOR SALE</span>` : "";
+    const featuredBadge = featured ? `<span class="featured-badge">⭐ FEATURED</span>` : "";
     if (photos.length === 0) {
-        photoHTML = `<div class="card-photo">${houseIconSVG()}</div>`;
+        photoHTML = `<div class="card-photo">${saleBadge}${featuredBadge}${houseIconSVG()}</div>`;
     } else if (photos.length === 1) {
-        photoHTML = `<div class="card-photo"><img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
+        photoHTML = `<div class="card-photo">${saleBadge}${featuredBadge}<img src="${photos[0]}" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${saleBadge.replace(/'/g,"\\'")}${featuredBadge.replace(/'/g,"\\'")}${fallbackIcon}'"></div>`;
     } else {
         photoHTML = `
         <div class="card-photo" id="photo-${idx}">
+            ${saleBadge}${featuredBadge}
             <img src="${photos[0]}" data-current="0" alt="Property photo" loading="lazy" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
             <button class="carousel-btn prev" onclick="event.stopPropagation(); changePhoto(${idx}, -1)" aria-label="Previous photo">‹</button>
             <button class="carousel-btn next" onclick="event.stopPropagation(); changePhoto(${idx}, 1)" aria-label="Next photo">›</button>
@@ -527,6 +598,11 @@ function renderCard(l, idx) {
     if (l.type) tags.push(l.type);
     if (l.bhk) tags.push(l.bhk + " BHK");
     if (l.furnished) tags.push(l.furnished + " Furnished");
+    if (l.listingType === "Sale") {
+        if (l.area) tags.push(l.area + " sq ft");
+        if (l.possession) tags.push(l.possession);
+    }
+    if (l.preference && l.preference.toLowerCase() !== "any") tags.push(l.preference);
 
     const showDirect = l.confirmation === "allow" && l.contact;
     const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
@@ -534,12 +610,12 @@ function renderCard(l, idx) {
     const btnClass = showDirect ? "" : "secondary";
 
     return `
-    <div class="card" onclick="openModal(${idx})">
+    <div class="card${featured ? ' is-featured' : ''}" onclick="openModal(${idx})">
         ${photoHTML}
         <div class="card-body">
             <div class="card-top">
                 <div class="location">📍 ${l.location || "Location on request"}</div>
-                <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
+                ${priceBlockHTML(l)}
             </div>
             <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
             ${l.description ? `<div class="description">${l.description}</div>` : ""}
@@ -568,15 +644,20 @@ function openModal(idx) {
     if (!l) return;
     modalPhotoIndex = 0;
     currentModalListing = l;
-    fullscreenPhotos = l.photos || [];
-    fullscreenIndex = 0;
 
     document.getElementById("modalPhotoArea").innerHTML = renderModalPhoto(l.photos, 0);
 
     const tags = [];
+    if (isFeaturedActive(l)) tags.push("⭐ Featured");
     if (l.type) tags.push(l.type);
     if (l.bhk) tags.push(l.bhk + " BHK");
     if (l.furnished) tags.push(l.furnished + " Furnished");
+    if (l.listingType === "Sale") {
+        if (l.area) tags.push(l.area + " sq ft");
+        if (l.age) tags.push(l.age + " old");
+        if (l.possession) tags.push(l.possession);
+    }
+    if (l.preference && l.preference.toLowerCase() !== "any") tags.push(l.preference);
 
     const showDirect = l.confirmation === "allow" && l.contact;
     const phoneNumber = showDirect ? l.contact : TOLETEARTH_CONTACT_NUMBER;
@@ -586,7 +667,7 @@ function openModal(idx) {
     document.getElementById("modalBody").innerHTML = `
         <div class="card-top">
             <div class="location">📍 ${l.location || "Location on request"}</div>
-            <div class="rent">₹${l.rent ? l.rent.toLocaleString("en-IN") : "—"}<span>/mo</span></div>
+            ${priceBlockHTML(l)}
         </div>
         <div class="tags">${tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
         ${l.description ? `<div class="description">${l.description}</div>` : `<div class="description">No additional description provided.</div>`}
@@ -611,11 +692,11 @@ function renderModalPhoto(photos, index) {
         return `<div class="modal-photo">${houseIconSVG()}</div>`;
     }
     if (photos.length === 1) {
-        return `<div class="modal-photo"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
+        return `<div class="modal-photo" onclick="openLightbox(0)"><img src="${photos[0]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'"></div>`;
     }
     return `
-    <div class="modal-photo" id="modalPhotoContainer">
-        <img id="modalPhotoImg" src="${photos[index]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
+    <div class="modal-photo" onclick="openLightbox(${index})">
+        <img src="${photos[index]}" alt="Property photo" onerror="this.parentElement.innerHTML='${fallbackIcon}'">
         <button class="carousel-btn prev" onclick="event.stopPropagation(); changeModalPhoto(-1)" aria-label="Previous photo">‹</button>
         <button class="carousel-btn next" onclick="event.stopPropagation(); changeModalPhoto(1)" aria-label="Next photo">›</button>
         <span class="carousel-count">${index + 1}/${photos.length}</span>
@@ -630,68 +711,53 @@ function changeModalPhoto(direction) {
     document.getElementById("modalPhotoArea").innerHTML = renderModalPhoto(photos, modalPhotoIndex);
 }
 
-// --- Fullscreen Lightbox Functions ---
+let lightboxIndex = 0;
 
-function openFullscreen() {
+function openLightbox(index) {
     if (!currentModalListing) return;
-    const photos = currentModalListing.photos || [];
-    if (photos.length === 0) return;
-    fullscreenPhotos = photos;
-    fullscreenIndex = modalPhotoIndex;
-    renderFullscreen();
-    document.getElementById("lightboxOverlay").classList.add("open");
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", fullscreenKeyHandler);
+    lightboxIndex = index;
+    renderLightbox();
+    document.getElementById("lightbox").classList.add("open");
 }
 
-function closeFullscreen() {
-    document.getElementById("lightboxOverlay").classList.remove("open");
-    document.body.style.overflow = "";
-    document.removeEventListener("keydown", fullscreenKeyHandler);
+function closeLightbox() {
+    document.getElementById("lightbox").classList.remove("open");
 }
 
-function renderFullscreen() {
-    const img = document.getElementById("lightboxImg");
-    const counter = document.getElementById("lightboxCounter");
-    img.src = fullscreenPhotos[fullscreenIndex] || "";
-    counter.textContent = fullscreenPhotos.length > 1 ? `${fullscreenIndex+1} / ${fullscreenPhotos.length}` : "";
-    document.getElementById("lightboxPrev").style.display = fullscreenPhotos.length > 1 ? "flex" : "none";
-    document.getElementById("lightboxNext").style.display = fullscreenPhotos.length > 1 ? "flex" : "none";
+function renderLightbox() {
+    const photos = currentModalListing.photos;
+    const nav = photos.length > 1 ? `
+        <button class="carousel-btn prev" onclick="event.stopPropagation(); changeLightboxPhoto(-1)" aria-label="Previous photo">‹</button>
+        <button class="carousel-btn next" onclick="event.stopPropagation(); changeLightboxPhoto(1)" aria-label="Next photo">›</button>
+        <span class="carousel-count">${lightboxIndex + 1}/${photos.length}</span>
+    ` : "";
+    document.getElementById("lightboxContent").innerHTML = `
+        <img src="${photos[lightboxIndex]}" alt="Full property photo">
+        ${nav}
+    `;
 }
 
-function changeFullscreen(direction) {
-    if (!fullscreenPhotos || fullscreenPhotos.length < 2) return;
-    fullscreenIndex = (fullscreenIndex + direction + fullscreenPhotos.length) % fullscreenPhotos.length;
-    renderFullscreen();
+function changeLightboxPhoto(direction) {
+    const photos = currentModalListing.photos;
+    lightboxIndex = (lightboxIndex + direction + photos.length) % photos.length;
+    renderLightbox();
 }
-
-function fullscreenKeyHandler(e) {
-    if (e.key === "Escape") closeFullscreen();
-    if (e.key === "ArrowLeft") changeFullscreen(-1);
-    if (e.key === "ArrowRight") changeFullscreen(1);
-}
-
-document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") {
-        if (document.getElementById("lightboxOverlay").classList.contains("open")) {
-            closeFullscreen();
-        } else {
-            closeModal();
-        }
-    }
-});
 
 function applyFilters() {
     const search = document.getElementById("searchInput").value.trim().toLowerCase();
     const bhk = document.getElementById("bhkFilter").value;
     const furnished = document.getElementById("furnishedFilter").value;
+    const preference = document.getElementById("preferenceFilter").value;
     const maxRent = document.getElementById("rentFilter").value;
 
     let filtered = allListings.filter(l => {
+        if (currentTypeFilter !== "All" && l.listingType !== currentTypeFilter) return false;
         if (search && !l.location.toLowerCase().includes(search) && !l.description.toLowerCase().includes(search)) return false;
         if (bhk && l.bhk !== bhk) return false;
         if (furnished && l.furnished !== furnished) return false;
-        if (maxRent && (!l.rent || l.rent > parseInt(maxRent))) return false;
+        if (preference && l.preference !== preference) return false;
+        // Budget filter only makes sense for rentals — never penalize Sale listings for it
+        if (maxRent && l.listingType !== "Sale" && (!l.rent || l.rent > parseInt(maxRent))) return false;
         return true;
     });
 
@@ -704,26 +770,32 @@ function applyFilters() {
         return;
     }
 
+    // Featured listings float to the top; otherwise preserve existing order
+    filtered.sort((a, b) => (isFeaturedActive(b) ? 1 : 0) - (isFeaturedActive(a) ? 1 : 0));
+
     countEl.textContent = `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} found`;
     currentPhotoSets = [];
     currentListings = filtered;
     grid.innerHTML = filtered.map((l, idx) => renderCard(l, idx)).join("");
 }
 
-Papa.parse(CSV_URL, {
+// Cache-buster: forces the browser to fetch a fresh copy every page load,
+// instead of reusing a stale cached version after you delete/edit rows.
+Papa.parse(CSV_URL + "&cb=" + Date.now(), {
     download: true,
     header: true,
     skipEmptyLines: true,
     complete: function(results) {
         allListings = results.data
             .map(normalizeRow)
-            .filter(l => l.location || l.rent)
-            .filter(l => l.status !== "rented");
+            .filter(l => l.location || l.rent || l.price) // drop fully blank rows
+            .filter(l => l.status !== "rented"); // hide rented/sold-out properties
 
         if (allListings.length === 0) {
             document.getElementById("stateMsg").textContent = "No listings available yet. Check back soon!";
             return;
         }
+
         populateFilterOptions(allListings);
         applyFilters();
     },
@@ -735,14 +807,28 @@ Papa.parse(CSV_URL, {
 document.getElementById("searchInput").addEventListener("input", applyFilters);
 document.getElementById("bhkFilter").addEventListener("change", applyFilters);
 document.getElementById("furnishedFilter").addEventListener("change", applyFilters);
+document.getElementById("preferenceFilter").addEventListener("change", applyFilters);
 document.getElementById("rentFilter").addEventListener("change", applyFilters);
 document.getElementById("clearBtn").addEventListener("click", function() {
     document.getElementById("searchInput").value = "";
     document.getElementById("bhkFilter").value = "";
     document.getElementById("furnishedFilter").value = "";
+    document.getElementById("preferenceFilter").value = "";
     document.getElementById("rentFilter").value = "";
     applyFilters();
 });
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        const lb = document.getElementById("lightbox");
+        if (lb.classList.contains("open")) {
+            closeLightbox();
+        } else {
+            closeModal();
+        }
+    }
+});
 </script>
+
 </body>
 </html>
