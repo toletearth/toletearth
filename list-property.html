@@ -24,7 +24,6 @@
       background-color: var(--bg);
       color: var(--text);
     }
-    /* Navigation */
     nav {
       display: flex;
       justify-content: center;
@@ -106,6 +105,34 @@
       resize: vertical;
       min-height: 80px;
     }
+
+    /* Listing type toggle */
+    .toggle-group {
+      display: flex;
+      gap: 12px;
+      margin: 10px 0;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      cursor: pointer;
+      background: white;
+      font-weight: 600;
+      color: var(--text);
+      user-select: none;
+    }
+    .toggle-btn.active {
+      border-color: var(--brand);
+      background: var(--brand-light);
+      color: var(--brand);
+    }
+    .hidden {
+      display: none;
+    }
+
     .file-input-wrap {
       border: 2px dashed var(--brand);
       border-radius: 8px;
@@ -197,9 +224,8 @@
 </head>
 <body>
 
-  <!-- Navigation -->
   <nav>
-    <a href="index.html">Home</a>
+    <a href="index.html">🏠 Home</a>
     <a href="about.html">About Us</a>
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
@@ -207,7 +233,6 @@
   </nav>
 
   <div class="container">
-    <!-- Header with Logo -->
     <div class="header">
       <img src="Color-removebg.png" alt="ToletEarth Logo" />
       <h1>List Your Property</h1>
@@ -215,6 +240,13 @@
     <p class="note">Free forever. Takes about 2 minutes. No brokers, no fees.</p>
 
     <form id="listingForm">
+      <label>Listing Type <span class="required">*</span></label>
+      <div class="toggle-group">
+        <div class="toggle-btn active" data-value="Rent" onclick="setListingType('Rent')">🏠 For Rent</div>
+        <div class="toggle-btn" data-value="Sale" onclick="setListingType('Sale')">💰 For Sale</div>
+      </div>
+      <input type="hidden" name="listingType" id="listingType" value="Rent" />
+
       <label><span class="icon">📛</span> Owner Name <span class="required">*</span></label>
       <input type="text" name="owner" required placeholder="e.g. Rajesh Kumar" />
 
@@ -224,6 +256,7 @@
         <option>Apartment</option>
         <option>Independent House</option>
         <option>PG / Shared Room</option>
+        <option>Plot</option>
         <option>Office Space</option>
         <option>Shop / Commercial</option>
       </select>
@@ -231,8 +264,29 @@
       <label><span class="icon">📍</span> Full Address / Locality <span class="required">*</span></label>
       <input type="text" name="address" required placeholder="e.g. Flat 19B, Chajju Majra, Mohali" />
 
-      <label><span class="icon">💰</span> Monthly Rent (₹) <span class="required">*</span></label>
-      <input type="number" name="rent" required min="0" placeholder="e.g. 15000" />
+      <!-- Rent-only field -->
+      <div id="rentFields">
+        <label><span class="icon">💰</span> Monthly Rent (₹) <span class="required">*</span></label>
+        <input type="number" id="rentInput" name="rent" min="0" placeholder="e.g. 15000" required />
+      </div>
+
+      <!-- Sale-only fields -->
+      <div id="saleFields" class="hidden">
+        <label><span class="icon">💰</span> Sale Price (₹) <span class="required">*</span></label>
+        <input type="number" id="priceInput" name="price" min="0" placeholder="e.g. 4500000" />
+
+        <label><span class="icon">📐</span> Carpet Area (sq. ft.)</label>
+        <input type="number" name="area" min="0" placeholder="e.g. 1200" />
+
+        <label><span class="icon">🏗️</span> Age of Property</label>
+        <input type="text" name="age" placeholder="e.g. 5 years" />
+
+        <label><span class="icon">🔑</span> Possession Status</label>
+        <select name="possession">
+          <option value="Ready to move">Ready to move</option>
+          <option value="Under construction">Under construction</option>
+        </select>
+      </div>
 
       <label><span class="icon">🛏️</span> BHK <span class="required">*</span></label>
       <select name="bhk" required>
@@ -261,7 +315,7 @@
       </select>
 
       <label><span class="icon">📝</span> Description</label>
-      <textarea name="description" placeholder="Amenities (AC, parking, nearby schools/metro, landmark details, etc."></textarea>
+      <textarea name="description" placeholder="Amenities (AC, parking, nearby schools/metro, landmark details, etc.)"></textarea>
 
       <label><span class="icon">🖼️</span> Upload Photos</label>
       <div class="file-input-wrap">
@@ -273,13 +327,13 @@
       <label><span class="icon">📞</span> Your Contact Number <span class="required">*</span></label>
       <input type="tel" name="contact" required placeholder="e.g. 98765 43210" />
 
-      <label><span class="icon">🔐</span> Show your number directly to renters?</label>
+      <label><span class="icon">🔐</span> Show your number directly to renters/buyers?</label>
       <select name="confirmation">
         <option value="Allow">✅ Yes — show my number (fast response)</option>
         <option value="Call us">🛡️ No — route calls through TOLET Earth (privacy first)</option>
       </select>
       <div class="privacy-note">
-        💡 <strong>Privacy tip:</strong> If you choose "Yes", renters will see your number directly. 
+        💡 <strong>Privacy tip:</strong> If you choose "Yes", people will see your number directly.
         Choose "No" if you prefer us to handle initial calls to protect your privacy.
       </div>
 
@@ -294,7 +348,24 @@
 
   <script>
     // ⚠️ IMPORTANT: Keep your Apps Script URL here
-    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzWNqwjAncmMP6fREzDpndiOy5C01CUXn_QWJ5Vo9g4JEVHPaZqYTxGUhv44cFZ_-I5_g/exec";
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbxOLgEsJoa-Y8UDbTWZmyQ_IIWyLmM2L_OvvLqwqBfGQkRglqadqHmi9wCDpeYyURVo/exec";
+
+    const rentInput = document.getElementById("rentInput");
+    const priceInput = document.getElementById("priceInput");
+
+    function setListingType(type) {
+      document.getElementById("listingType").value = type;
+      document.querySelectorAll(".toggle-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.value === type);
+      });
+      const isRent = type === "Rent";
+      document.getElementById("rentFields").classList.toggle("hidden", !isRent);
+      document.getElementById("saleFields").classList.toggle("hidden", isRent);
+
+      // Toggle 'required' so a hidden field never silently blocks submission
+      rentInput.required = isRent;
+      priceInput.required = !isRent;
+    }
 
     const photoInput = document.getElementById("photoInput");
     const photoPreview = document.getElementById("photoPreview");
@@ -331,9 +402,6 @@
       const formData = new FormData(e.target);
       formData.delete("photoInput");
 
-      // Convert each photo to base64 text instead of sending as a raw file —
-      // Apps Script's e.files is unreliable with fetch()-based multipart
-      // uploads, but reading plain text parameters works consistently.
       function fileToBase64(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -363,6 +431,7 @@
         statusMsg.textContent = "✅ Submitted! Your listing will appear on the site shortly.";
         e.target.reset();
         photoPreview.innerHTML = "";
+        setListingType("Rent");
       } catch (err) {
         statusMsg.className = "status-msg error";
         statusMsg.textContent = "❌ Something went wrong. Please try again or contact us directly.";
