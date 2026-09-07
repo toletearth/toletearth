@@ -797,7 +797,16 @@ Papa.parse(CSV_URL + "&cb=" + Date.now(), {
         }
 
         populateFilterOptions(allListings);
-        applyFilters();
+
+        // Allow deep-links like listings.html?type=Sale to open directly
+        // on the right tab, so homepage buttons can send people straight
+        // to Rent, Sale, or All instead of always defaulting to Rent.
+        const urlType = new URLSearchParams(window.location.search).get("type");
+        if (urlType && ["Rent", "Sale", "All"].includes(urlType)) {
+            setListingTypeFilter(urlType);
+        } else {
+            applyFilters();
+        }
     },
     error: function() {
         document.getElementById("stateMsg").textContent = "Couldn't load listings right now. Please try again shortly.";
