@@ -237,7 +237,8 @@
       <img src="Color-removebg.png" alt="ToletEarth Logo" />
       <h1>List Your Property</h1>
     </div>
-    <p class="note">Free forever. Takes about 2 minutes. No brokers, no fees.</p>
+    <p class="note">Free forever. Takes about 2 minutes. No brokers, no fees.<br>
+    <span style="font-style:normal; font-size:12px;">💡 Listing is always free — an optional paid "Featured" boost is available afterward if you want faster visibility.</span></p>
 
     <form id="listingForm">
       <label>Listing Type <span class="required">*</span></label>
@@ -268,6 +269,15 @@
       <div id="rentFields">
         <label><span class="icon">💰</span> Monthly Rent (₹) <span class="required">*</span></label>
         <input type="number" id="rentInput" name="rent" min="0" placeholder="e.g. 15000" required />
+
+        <label><span class="icon">👥</span> Preferred Tenants</label>
+        <select name="preference">
+          <option value="Any">Any (Family / Bachelors / All)</option>
+          <option>Family</option>
+          <option>Boys Only</option>
+          <option>Girls Only</option>
+          <option>Company Lease</option>
+        </select>
       </div>
 
       <!-- Sale-only fields -->
@@ -305,15 +315,6 @@
         <option>Unfurnished</option>
       </select>
 
-      <label><span class="icon">👥</span> Preferred Tenants</label>
-      <select name="preference">
-        <option value="Any">Any (Family / Bachelors / All)</option>
-        <option>Family</option>
-        <option>Boys Only</option>
-        <option>Girls Only</option>
-        <option>Company Lease</option>
-      </select>
-
       <label><span class="icon">📝</span> Description</label>
       <textarea name="description" placeholder="Amenities (AC, parking, nearby schools/metro, landmark details, etc.)"></textarea>
 
@@ -348,7 +349,7 @@
 
   <script>
     // ⚠️ IMPORTANT: Keep your Apps Script URL here
-    const ENDPOINT_URL = https://script.google.com/macros/s/AKfycbzWNqwjAncmMP6fREzDpndiOy5C01CUXn_QWJ5Vo9g4JEVHPaZqYTxGUhv44cFZ_-I5_g/exec";
+    const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzWNqwjAncmMP6fREzDpndiOy5C01CUXn_QWJ5Vo9g4JEVHPaZqYTxGUhv44cFZ_-I5_g/exec";
 
     const rentInput = document.getElementById("rentInput");
     const priceInput = document.getElementById("priceInput");
@@ -365,6 +366,13 @@
       // Toggle 'required' so a hidden field never silently blocks submission
       rentInput.required = isRent;
       priceInput.required = !isRent;
+    }
+
+    // Allow deep-links like list-property.html?type=Sale to open directly
+    // on the Sale form instead of always defaulting to Rent.
+    const urlType = new URLSearchParams(window.location.search).get("type");
+    if (urlType === "Sale" || urlType === "Rent") {
+      setListingType(urlType);
     }
 
     const photoInput = document.getElementById("photoInput");
