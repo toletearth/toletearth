@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="TOLET Earth – Free, broker-free rental platform in Chandigarh, Mohali, Panchkula & Delhi. Verified listings, direct owner contact.">
-  <title>TOLET Earth – Rent Freely, Live Peacefully</title>
+  <meta name="description" content="TOLET Earth – Free, broker-free platform to Rent, Buy or Sell property in Chandigarh, Mohali, Panchkula & Delhi. Verified listings, direct owner contact.">
+  <title>TOLET Earth – Rent, Buy & Sell Freely</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -59,7 +59,9 @@
     .hero {
       text-align: center;
       padding: 3rem 1rem;
-      background: url('Flowers%20Add.JPG') no-repeat center/cover;
+      background:
+        linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.45)),
+        url('Flowers%20Add.JPG') no-repeat center/cover;
       color: #FFFFFF;
       text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
       min-height: 400px;
@@ -102,6 +104,12 @@
       background: #1e4568;
       transform: scale(1.02);
     }
+    .btn-amber {
+      background: #b45309 !important;
+    }
+    .btn-amber:hover {
+      background: #92400a !important;
+    }
     footer {
       text-align: center;
       padding: 2rem;
@@ -133,7 +141,7 @@
       </span>
       <img src="Color-removebg.png" width="45" height="45" alt="TOLET Earth Logo">
     </h1>
-    <div class="tagline">Rent freely. Connect directly. No brokers.</div>
+    <div class="tagline">Rent, buy or sell — freely. No brokers.</div>
   </header>
 
   <nav>
@@ -144,11 +152,16 @@
   </nav>
 
   <section class="hero" id="home">
-    <h2>Find Rental Home in Chandigarh, Mohali & Panchkula — No Brokers, No Fees.</h2>
-    <p>Join a trusted community of homeowners and renters.</p>
-    <a href="listings.html">
-      <button>Browse Listings</button>
-    </a>
+    <h2>Rent, Buy or Sell Property in Chandigarh, Mohali & Panchkula — No Brokers, No Fees.</h2>
+    <p>Join a trusted community of homeowners, renters, buyers & sellers.</p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+      <a href="listings.html?type=Rent">
+        <button>Browse Rentals 🏠</button>
+      </a>
+      <a href="listings.html?type=Sale">
+        <button class="btn-amber">Buy / Sell Property 💰</button>
+      </a>
+    </div>
   </section>
 
   <div class="container">
@@ -174,9 +187,22 @@
     <section class="card">
       <h2>For Renters</h2>
       <p>Find homes that match your budget and needs.</p>
-      <a href="listings.html">
+      <a href="listings.html?type=Rent">
         <button>Browse Listings 🏠</button>
       </a>
+    </section>
+
+    <section class="card">
+      <h2>Buying or Selling a Property?</h2>
+      <p>List your property for sale free of cost, or browse verified properties for sale — direct from owners, no brokerage.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="list-property.html?type=Sale">
+          <button class="btn-amber">List Property for Sale 🏷️</button>
+        </a>
+        <a href="listings.html?type=Sale">
+          <button class="btn-amber">Browse Properties for Sale 🔍</button>
+        </a>
+      </div>
     </section>
   </div>
 
