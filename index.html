@@ -110,6 +110,29 @@
     .btn-amber:hover {
       background: #92400a !important;
     }
+    .btn-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .new-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #dc2626;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+      animation: pulse-badge 1.8s infinite;
+      pointer-events: none;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
     footer {
       text-align: center;
       padding: 2rem;
@@ -158,8 +181,9 @@
       <a href="listings.html?type=Rent">
         <button>Browse Rentals 🏠</button>
       </a>
-      <a href="listings.html?type=Sale">
+      <a href="listings.html?type=Sale" class="btn-wrap">
         <button class="btn-amber">Buy / Sell Property 💰</button>
+        <span class="new-badge">NEW</span>
       </a>
     </div>
   </section>
@@ -196,11 +220,13 @@
       <h2>Buying or Selling a Property?</h2>
       <p>List your property for sale free of cost, or browse verified properties for sale — direct from owners, no brokerage.</p>
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        <a href="list-property.html?type=Sale">
+        <a href="list-property.html?type=Sale" class="btn-wrap">
           <button class="btn-amber">List Property for Sale 🏷️</button>
+          <span class="new-badge">NEW</span>
         </a>
-        <a href="listings.html?type=Sale">
+        <a href="listings.html?type=Sale" class="btn-wrap">
           <button class="btn-amber">Browse Properties for Sale 🔍</button>
+          <span class="new-badge">NEW</span>
         </a>
       </div>
     </section>
