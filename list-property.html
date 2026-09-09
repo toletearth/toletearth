@@ -252,7 +252,7 @@
       <input type="text" name="owner" required placeholder="e.g. Rajesh Kumar" />
 
       <label><span class="icon">🏢</span> Property Type <span class="required">*</span></label>
-      <select name="propertyType" required>
+      <select name="propertyType" id="propertyTypeSelect" required>
         <option value="">Select...</option>
         <option>Apartment</option>
         <option>Independent House</option>
@@ -353,6 +353,23 @@
 
     const rentInput = document.getElementById("rentInput");
     const priceInput = document.getElementById("priceInput");
+    const propertyTypeSelect = document.getElementById("propertyTypeSelect");
+
+    const RENT_PROPERTY_TYPES = ["Apartment", "Independent House", "PG / Shared Room", "Office Space", "Shop / Commercial"];
+    const SALE_PROPERTY_TYPES = ["Apartment / Flat", "Independent House", "Villa", "Plot / Land", "Shop / Commercial"];
+
+    function populatePropertyTypes(type) {
+      const options = type === "Sale" ? SALE_PROPERTY_TYPES : RENT_PROPERTY_TYPES;
+      const previousValue = propertyTypeSelect.value;
+      propertyTypeSelect.innerHTML = '<option value="">Select...</option>'
+        + options.map(o => `<option>${o}</option>`).join("");
+      // Keep the same selection if it's still valid for the new list (e.g.
+      // "Independent House" exists in both); otherwise reset to blank so
+      // nobody accidentally submits an option meant for the other type.
+      if (options.includes(previousValue)) {
+        propertyTypeSelect.value = previousValue;
+      }
+    }
 
     function setListingType(type) {
       document.getElementById("listingType").value = type;
@@ -362,6 +379,7 @@
       const isRent = type === "Rent";
       document.getElementById("rentFields").classList.toggle("hidden", !isRent);
       document.getElementById("saleFields").classList.toggle("hidden", isRent);
+      populatePropertyTypes(type);
 
       // Toggle 'required' so a hidden field never silently blocks submission
       rentInput.required = isRent;
